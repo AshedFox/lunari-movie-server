@@ -1,26 +1,44 @@
 import {
-  Brackets,
+  EntityManager,
+  EntityMetadata,
+  ObjectLiteral,
   Repository,
   SelectQueryBuilder,
-  WhereExpressionBuilder,
 } from 'typeorm';
 import { FilterComparisonType, FilterType } from './filter';
 import { PaginationArgsType } from './pagination';
-import { SortDirectionEnum, SortOptionsType, SortType } from './sort';
-import { snakeCase } from 'typeorm/util/StringUtils';
-import { RelationMetadata } from 'typeorm/metadata/RelationMetadata';
+import { SortDirectionEnum, SortType, SortVariant } from './sort';
 import { ArgsType } from '@common/args';
 import { OffsetPaginationArgsType } from './pagination/offset';
 import { RelayPaginationArgsType } from './pagination/relay';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 
-type Operators = {
-  [key: string]: {
+// FILTERS
+
+type OperatorKey =
+  | 'eq'
+  | 'neq'
+  | 'gt'
+  | 'gte'
+  | 'lt'
+  | 'lte'
+  | 'like'
+  | 'nlike'
+  | 'ilike'
+  | 'nilike'
+  | 'in'
+  | 'nin'
+  | 'btwn'
+  | 'nbtwn';
+
+type Operators = Record<
+  OperatorKey,
+  {
     withNull?: string;
     withValue?: string;
     valueTransform?: (value: any) => any;
-  };
-};
+  }
+>;
 
 const FILTER_OPERATORS: Operators = {
   eq: { withNull: 'IS NULL', withValue: '= :value' },
@@ -45,123 +63,147 @@ const FILTER_OPERATORS: Operators = {
   },
 };
 
-const applyFieldFilter = <T>(
-  where: WhereExpressionBuilder,
+const constructFieldFilter = (
+  operator: OperatorKey,
+  operand: unknown,
   fieldName: string,
-  filter: FilterComparisonType<T>,
-  operator: 'and' | 'or',
-  alias?: string,
-) => {
-  const operatorProp = operator === 'and' ? 'andWhere' : 'orWhere';
+  alias: string,
+): {
+  where: string;
+  params?: ObjectLiteral;
+} => {
+  const filterOperator = FILTER_OPERATORS[operator];
   const name = randomStringGenerator();
-  const snakeName = alias
-    ? `"${alias}"."${snakeCase(fieldName)}"`
-    : `"${snakeCase(fieldName)}"`;
 
-  Object.entries(filter).forEach(([filterName, value]) => {
-    const filterOperator = FILTER_OPERATORS[filterName];
+  if (operand === null) {
+    if (filterOperator.withNull) {
+      return { where: `${alias}.${fieldName} ${filterOperator.withNull}` };
+    }
+    return;
+  }
 
-    if (!filterOperator) {
-      return applyFieldFilter(
-        where,
-        filterName,
-        filter[filterName],
-        operator,
-        fieldName,
+  if (filterOperator.withValue) {
+    const transformedValue = filterOperator.valueTransform
+      ? filterOperator.valueTransform(operand)
+      : operand;
+
+    if (operator === 'btwn' || operator === 'nbtwn') {
+      return {
+        where: `${alias}.${fieldName} ${filterOperator.withValue}`,
+        params: {
+          [`${name}${operator}Start`]: transformedValue.startValue,
+          [`${name}${operator}End`]: transformedValue.endValue,
+        },
+      };
+    } else if (operator === 'nin' || operator === 'in') {
+      const paramName = `${name}${operator}Value`;
+      const withValue = filterOperator.withValue.replace(
+        ':...value',
+        `:...${paramName}`,
       );
-    }
-
-    if (value === null) {
-      if (filterOperator.withNull) {
-        where[operatorProp](`${snakeName} ${filterOperator.withNull}`);
-      }
-      return;
-    }
-
-    if (filterOperator.withValue) {
-      const transformedValue = filterOperator.valueTransform
-        ? filterOperator.valueTransform(value)
-        : value;
-
-      if (filterName === 'btwn' || filterName === 'nbtwn') {
-        where[operatorProp](`${snakeName} ${filterOperator.withValue}`, {
-          [`${name}${filterName}Start`]: transformedValue.startValue,
-          [`${name}${filterName}End`]: transformedValue.endValue,
-        });
-      } else if (filterName === 'nin' || filterName === 'in') {
-        const paramName = `${name}${filterName}Value`;
-        const withValue = filterOperator.withValue.replace(
-          ':...value',
-          `:...${paramName}`,
-        );
-        where[operatorProp](`${snakeName} ${withValue}`, {
+      return {
+        where: `${alias}.${fieldName} ${withValue}`,
+        params: {
           [paramName]: transformedValue,
-        });
-      } else {
-        const paramName = `${name}${filterName}Value`;
-        const withValue = filterOperator.withValue.replace(
-          ':value',
-          `:${paramName}`,
-        );
-        where[operatorProp](`${snakeName} ${withValue}`, {
-          [paramName]: transformedValue,
-        });
-      }
-    }
-  });
-};
-
-const applyFilterTreeLevel = <T>(
-  qb: WhereExpressionBuilder,
-  filter: FilterType<T>,
-  operator: 'or' | 'and',
-  alias?: string,
-) => {
-  Object.keys(filter).forEach((key) => {
-    if (key === 'and') {
-      qb.andWhere(
-        new Brackets((where) =>
-          filter[key].forEach((q) =>
-            applyFilterTreeLevel(where, q, 'and', alias),
-          ),
-        ),
-      );
-    } else if (key === 'or') {
-      qb.orWhere(
-        new Brackets((where) =>
-          filter[key].forEach((q) =>
-            applyFilterTreeLevel(where, q, 'or', alias),
-          ),
-        ),
-      );
+        },
+      };
     } else {
-      applyFieldFilter(qb, key, filter[key], operator, alias);
+      const paramName = `${name}${operator}Value`;
+      const withValue = filterOperator.withValue.replace(
+        ':value',
+        `:${paramName}`,
+      );
+      return {
+        where: `${alias}.${fieldName} ${withValue}`,
+        params: {
+          [paramName]: transformedValue,
+        },
+      };
     }
-  });
+  }
 };
 
-export const applyFilter = <T>(
+function applyFilters<T>(
   qb: SelectQueryBuilder<T>,
   filter: FilterType<T>,
-  alias?: string,
-) => {
-  applyFilterTreeLevel(qb, filter, 'and', alias ?? qb.alias);
-};
+  alias: string,
+  scope: 'and' | 'or' = 'and',
+  entityManager?: EntityManager,
+  metadata?: EntityMetadata,
+) {
+  for (const key in filter) {
+    if (key === 'and' || key === 'or') {
+      for (const nestedKey in filter[key]) {
+        applyFilters(
+          qb,
+          filter[key][nestedKey],
+          alias,
+          key,
+          entityManager,
+          metadata,
+        );
+      }
+    } else {
+      const value = filter[key] as FilterComparisonType<any>;
 
-export const applyOffsetPagination = <T>(
+      for (const [nestedKey, nestedValue] of Object.entries(value)) {
+        if (FILTER_OPERATORS[nestedKey]) {
+          const { where, params } = constructFieldFilter(
+            nestedKey as OperatorKey,
+            nestedValue,
+            key,
+            alias,
+          );
+          qb.andWhere(where, params);
+        } else if (metadata && entityManager) {
+          const relation = metadata.relations.find(
+            (rel) => rel.propertyName === key,
+          );
+
+          if (relation) {
+            const newAlias = `${alias}_${key}`;
+            if (
+              !qb.expressionMap.joinAttributes.some(
+                (join) => join.alias.name === newAlias,
+              )
+            ) {
+              qb.leftJoin(`${alias}.${relation.propertyName}`, newAlias);
+            }
+            const newMetadata = entityManager.connection.getMetadata(
+              relation.type,
+            );
+
+            applyFilters(
+              qb,
+              value,
+              newAlias,
+              scope,
+              entityManager,
+              newMetadata,
+            );
+          }
+        }
+      }
+    }
+  }
+}
+
+// PAGIANATION
+
+const applyOffsetPagination = <T>(
   qb: SelectQueryBuilder<T>,
   pagination: OffsetPaginationArgsType,
 ) => {
   qb.limit(pagination.limit).offset(pagination.offset);
 };
 
-export const applyRelayPagination = <T>(
+const applyRelayPagination = <T>(
   qb: SelectQueryBuilder<T>,
   pagination: RelayPaginationArgsType,
-  alias?: string,
+  alias: string,
 ) => {
   const { first, last, before, after } = pagination;
-  const idFieldName = alias ? `"${alias}"."id"` : `"id"`;
+  const idFieldName = alias ? `${alias}.id` : `id`;
 
   if (first) {
     if (after) {
@@ -176,10 +218,10 @@ export const applyRelayPagination = <T>(
   }
 };
 
-export const applyPagination = <T>(
+const applyPagination = <T>(
   qb: SelectQueryBuilder<T>,
   pagination: PaginationArgsType,
-  alias?: string,
+  alias: string,
 ) => {
   if ('offset' in pagination) {
     applyOffsetPagination(qb, pagination);
@@ -188,183 +230,199 @@ export const applyPagination = <T>(
   }
 };
 
-const applyFieldSort = (
+// SORT
+
+const applyFieldSort = <T>(
   qb: SelectQueryBuilder<any>,
   fieldName: string,
-  options: SortOptionsType,
-  alias?: string,
+  variant: SortVariant<T>,
+  alias: string,
+  entityManager?: EntityManager,
+  metadata?: EntityMetadata,
 ) => {
-  const snakeName = alias
-    ? `"${alias}"."${snakeCase(fieldName)}"`
-    : `"${snakeCase(fieldName)}"`;
+  if (!('direction' in variant)) {
+    if (entityManager && metadata) {
+      const relation = metadata.relations.find(
+        (rel) => rel.propertyName === fieldName,
+      );
 
-  if (!options?.direction && !options?.nulls) {
-    return Object.keys(options).forEach((key) => {
-      applyFieldSort(qb, key, options[key], fieldName);
-    });
+      if (relation) {
+        const newAlias = `${alias}_${fieldName}`;
+        if (
+          !qb.expressionMap.joinAttributes.some(
+            (join) => join.alias.name === newAlias,
+          )
+        ) {
+          qb.leftJoin(`${alias}.${relation.propertyName}`, newAlias);
+        }
+        const newMetadata = entityManager.connection.getMetadata(relation.type);
+
+        for (const key in variant) {
+          applyFieldSort(
+            qb,
+            key,
+            variant[key],
+            newAlias,
+            entityManager,
+            newMetadata,
+          );
+        }
+      }
+    }
+    return;
   }
 
-  const direction = options.direction?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+  const direction = variant.direction?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
   const nulls =
-    options.nulls?.toUpperCase() === 'FIRST'
+    variant.nulls?.toUpperCase() === 'FIRST'
       ? 'NULLS FIRST'
-      : options.nulls?.toUpperCase() === 'LAST'
+      : variant.nulls?.toUpperCase() === 'LAST'
         ? 'NULLS LAST'
         : undefined;
 
-  qb.addOrderBy(snakeName, direction, nulls);
+  qb.addOrderBy(`${alias}.${fieldName}`, direction, nulls);
 };
 
-export const applySort = <T>(
+const applySort = <T>(
   qb: SelectQueryBuilder<T>,
   sort: SortType<T>,
-  alias?: string,
+  alias: string,
+  entityManager?: EntityManager,
+  metadata?: EntityMetadata,
 ) => {
-  Object.keys(sort).forEach((key) => {
-    applyFieldSort(qb, key, sort[key], alias);
-  });
+  const sortKeys = Object.keys(sort);
+  const primaryColumns = metadata.primaryColumns.filter(
+    (value) => !sortKeys.includes(value.propertyName),
+  );
 
-  if (!('id' in sort)) {
-    applyFieldSort(qb, 'id', { direction: SortDirectionEnum.ASC }, alias);
+  for (const key of sortKeys) {
+    applyFieldSort(qb, key, sort[key], alias, entityManager, metadata);
+  }
+
+  for (const primaryColumn of primaryColumns) {
+    applyFieldSort(
+      qb,
+      primaryColumn.propertyName,
+      { direction: SortDirectionEnum.ASC },
+      alias,
+    );
   }
 };
 
-const applyJoins = <T>(
-  qb: SelectQueryBuilder<T>,
-  relations: RelationMetadata[],
-) => {
-  relations.forEach((r) => {
-    qb.leftJoinAndSelect(`${qb.alias}.${r.propertyName}`, r.propertyName);
-  });
-};
-
-const getFilterRelations = (filter: FilterType<any>) => {
-  const fields = new Map<string, string>();
-
-  for (const filterKey in filter) {
-    if (filterKey === 'and' || filterKey === 'or') {
-      for (const el of filter[filterKey]) {
-        const items = getFilterRelations(el);
-
-        for (const item of items) {
-          fields.set(item[0], item[1]);
-        }
-      }
-    } else {
-      fields.set(filterKey, filterKey);
-    }
-  }
-
-  return fields;
-};
-
-const getRelations = <T>(
-  relationsMeta: RelationMetadata[],
-  filter: FilterType<T> = {},
-  sort: SortType<T> = {},
-) => {
-  const fields = new Map<string, string>(getFilterRelations(filter));
-
-  for (const sortKey in sort) {
-    if (sortKey !== 'direction' && sortKey !== 'nulls') {
-      fields.set(sortKey, sortKey);
-    }
-  }
-
-  const keys = Array.from(fields.keys());
-
-  return keys.length > 0
-    ? relationsMeta.filter((r) => keys.includes(r.propertyName))
-    : [];
-};
-
-export function getCount<T>(repo: Repository<T>, filter?: FilterType<T>) {
-  const relations = getRelations(repo.metadata.relations, filter);
-
+/**
+ * Get count with filter (if passed)
+ * @param repo Repository of the entity for which the args are specified
+ * @param filter Filter parameters
+ * @returns Count
+ */
+export function getCount<T>(
+  repo: Repository<T>,
+  filter?: FilterType<T>,
+): Promise<number> {
+  const entityManager = repo.manager;
   const qb = repo.createQueryBuilder(repo.metadata.name);
 
-  applyJoins(qb, relations);
-
   if (filter) {
-    applyFilter(qb, filter);
+    applyFilters(qb, filter, qb.alias, 'and', entityManager, repo.metadata);
   }
 
   return qb.getCount();
 }
 
+// DISTINCT ON
+
+function constructDistinctOn<T>(sort: SortType<T>, alias: string): Set<string> {
+  const distinctOn = new Set<string>();
+
+  for (const key in sort) {
+    if ('direction' in sort[key]) {
+      distinctOn.add(`${alias}.${key}`);
+    } else {
+      const nestedDistinctOn = constructDistinctOn(
+        sort[key],
+        `${alias}_${key}`,
+      );
+
+      for (const value of nestedDistinctOn) {
+        distinctOn.add(value);
+      }
+    }
+  }
+
+  return distinctOn;
+}
+
 function applyDistinctOn<T>(
   qb: SelectQueryBuilder<T>,
   sort: SortType<T> = {},
-  alias?: string,
+  alias: string,
+  metadata: EntityMetadata,
 ) {
-  const distinctOn = Object.keys(sort).map(
-    (key) => `"${alias}"."${snakeCase(key)}"`,
-  );
+  const distinctOn = constructDistinctOn(sort, alias);
 
-  if (!('id' in sort)) {
-    distinctOn.push(`"${alias}"."id"`);
+  for (const primaryColumn of metadata.primaryColumns) {
+    distinctOn.add(`${alias}.${primaryColumn.propertyName}`);
   }
 
-  qb.distinctOn(distinctOn);
+  qb.distinctOn([...distinctOn]);
 }
 
-export function parseArgsToQuery<T>(
+/**
+ * Parse query args (pagination, sort and filters) to typeorm query builder
+ * @param repo Repository of the entity for which the args are specified
+ * @param pagination Pagination parameters (offset or relay pagination)
+ * @param sort Sort parameters
+ * @param filter Filter parameters
+ * @returns Entites with applied args
+ */
+export function getMany<T>(
   repo: Repository<T>,
   pagination?: PaginationArgsType,
   sort?: SortType<T>,
   filter?: FilterType<T>,
-) {
-  const relations = getRelations(repo.metadata.relations, filter, sort);
+): Promise<T[]> {
+  const entityManager = repo.manager;
   const qb = repo.createQueryBuilder(repo.metadata.name);
 
-  applyJoins(qb, relations);
-
-  if (relations.length > 0) {
-    applyDistinctOn(qb, sort, qb.alias);
-  }
-
-  if (sort) {
-    applySort(qb, sort, qb.alias);
-  } else {
-    applyFieldSort(qb, 'id', { direction: SortDirectionEnum.ASC }, qb.alias);
-  }
+  applyDistinctOn(qb, sort, qb.alias, repo.metadata);
+  applySort(qb, sort ?? {}, qb.alias, entityManager, repo.metadata);
 
   if (filter) {
-    applyFilter(qb, filter, qb.alias);
+    applyFilters(qb, filter, qb.alias, 'and', entityManager, repo.metadata);
   }
 
   if (pagination) {
     applyPagination(qb, pagination, qb.alias);
   }
 
-  return qb;
+  return qb.getMany();
 }
 
+/**
+ * Parse query args (pagination, sort and filters) to typeorm query builder
+ * @param qb Query builder to apply args to
+ * @param args Args (sort and filters)
+ * @param pagination Pagination parameters (offset or relay pagination)
+ * @param alias Base alias for query builder
+ * @returns Passed query builder with applied pagination, sort and filters
+ */
 export function applyArgs<T>(
   qb: SelectQueryBuilder<T>,
   args: ArgsType<T>,
   pagination?: PaginationArgsType,
   alias?: string,
-) {
+): SelectQueryBuilder<T> {
   const { filter, sort } = args;
 
-  if (sort) {
-    applySort(qb, sort, alias);
-  }
+  applySort(qb, sort ?? {}, alias ?? qb.alias);
+
   if (pagination) {
-    applyPagination(qb, pagination);
+    applyPagination(qb, pagination, alias ?? qb.alias);
   }
   if (filter) {
-    applyFilter(qb, filter, alias);
+    applyFilters(qb, filter, alias ?? qb.alias);
   }
 
   return qb;
 }
-
-export default {
-  applySort,
-  applyFilter,
-  applyPagination,
-  applyArgs,
-};

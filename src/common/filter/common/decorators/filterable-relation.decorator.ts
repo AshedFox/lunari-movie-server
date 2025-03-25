@@ -5,23 +5,29 @@ import { FILTERABLE_RELATION_KEY } from '../constants';
 import { Field } from '@nestjs/graphql';
 import { getPrototypeChain } from '@utils/helpers';
 
+type FilterableRelationOptions =
+  | (FieldOptions & { hide?: false })
+  | ({ [K in keyof FieldOptions]?: never } & { hide: true });
+
 export type FilterableRelationMetadata = {
   target: Type;
   propertyKey: string;
   returnTypeFunction: ReturnTypeFunc;
-  advancedOptions?: FieldOptions;
+  advancedOptions?: FilterableRelationOptions;
 };
 
 export function FilterableRelation(): PropertyDecorator;
-export function FilterableRelation(options: FieldOptions): PropertyDecorator;
+export function FilterableRelation(
+  options: FilterableRelationOptions,
+): PropertyDecorator;
 export function FilterableRelation(
   returnTypeFn?: ReturnTypeFunc,
-  options?: FieldOptions,
+  options?: FilterableRelationOptions,
 ): PropertyDecorator;
 
 export function FilterableRelation(
-  returnTypeFnOrOptions?: ReturnTypeFunc | FieldOptions,
-  fieldOptions?: FieldOptions,
+  returnTypeFnOrOptions?: ReturnTypeFunc | FilterableRelationOptions,
+  fieldOptions?: FilterableRelationOptions,
 ): PropertyDecorator {
   const [returnTypeFn, options] =
     typeof returnTypeFnOrOptions === 'function'
@@ -46,9 +52,13 @@ export function FilterableRelation(
     Reflect.defineMetadata(FILTERABLE_RELATION_KEY, data, target.constructor);
 
     if (returnTypeFn) {
-      return Field(returnTypeFn, options)(target, propertyKey, descriptor);
+      if (!options?.hide) {
+        return Field(returnTypeFn, options)(target, propertyKey, descriptor);
+      }
     } else if (options) {
-      return Field(options)(target, propertyKey, descriptor);
+      if (!options?.hide) {
+        return Field(options)(target, propertyKey, descriptor);
+      }
     } else {
       return Field()(target, propertyKey, descriptor);
     }

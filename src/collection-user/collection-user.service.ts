@@ -10,7 +10,7 @@ import { UserService } from '../user/user.service';
 import { OffsetPaginationArgsType } from '@common/pagination/offset';
 import { FilterType } from '@common/filter';
 import { SortType } from '@common/sort';
-import { parseArgsToQuery } from '@common/typeorm-query-parser';
+import { getCount, getMany } from '@common/typeorm-query-parser';
 
 @Injectable()
 export class CollectionUserService {
@@ -24,12 +24,7 @@ export class CollectionUserService {
   count = async (
     filter?: FilterType<CollectionUserEntity>,
   ): Promise<number> => {
-    return parseArgsToQuery(
-      this.collectionUserRepository,
-      undefined,
-      undefined,
-      filter,
-    ).getCount();
+    return getCount(this.collectionUserRepository, filter);
   };
 
   create = async (
@@ -55,12 +50,7 @@ export class CollectionUserService {
     sort?: SortType<CollectionUserEntity>,
     filter?: FilterType<CollectionUserEntity>,
   ): Promise<CollectionUserEntity[]> => {
-    return parseArgsToQuery(
-      this.collectionUserRepository,
-      pagination,
-      sort,
-      filter,
-    ).getMany();
+    return getMany(this.collectionUserRepository, pagination, sort, filter);
   };
 
   readOne = async (

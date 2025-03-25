@@ -80,6 +80,21 @@ export function GqlArgs<
       @IsOptional()
       before?: string;
     }
+    ArgsStorage.set(`${classRef.name}_${paginationVariant}`, GqlArgs);
+
+    return GqlArgs as Type<AT<T> & PT>;
+  } else {
+    @ArgsType()
+    class GqlArgs {
+      @ValidateNested()
+      @Field(() => ST, { nullable: true })
+      @TypeDecorator(() => ST)
+      sort?: SortType<T>;
+      @ValidateNested()
+      @Field(() => FT, { nullable: true })
+      @TypeDecorator(() => FT)
+      filter?: FilterType<T>;
+    }
 
     ArgsStorage.set(`${classRef.name}_${paginationVariant}`, GqlArgs);
 

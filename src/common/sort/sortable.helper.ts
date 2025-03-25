@@ -21,6 +21,7 @@ export function Sortable<T>(classRef: Type<T>) {
   return createSortableType(
     classRef,
     `${capitalize(name)}Sort`,
+    0,
     filterableRelations,
   );
 }
@@ -28,6 +29,7 @@ export function Sortable<T>(classRef: Type<T>) {
 function createSortableType<T>(
   classRef: Type<T>,
   name: string,
+  level: number,
   relations?: FilterableRelationMetadata[],
 ) {
   const ExistingSort = SortStorage.get(name);
@@ -51,25 +53,31 @@ function createSortableType<T>(
       propertyKey,
     );
   });
-  relations?.forEach(({ returnTypeFunction, propertyKey, advancedOptions }) => {
-    if (!returnTypeFunction) {
-      throw new Error(
-        `No explicit type for sortable relation ${propertyKey} in ${classRef}`,
-      );
-    }
+  if (level <= 5) {
+    relations?.forEach(
+      ({ returnTypeFunction, propertyKey, advancedOptions }) => {
+        if (!returnTypeFunction) {
+          throw new Error(
+            `No explicit type for sortable relation ${propertyKey} in ${classRef}`,
+          );
+        }
 
-    const returnType = returnTypeFunction();
-    const type = Array.isArray(returnType)
-      ? (returnType[0] as Type)
-      : (returnType as Type);
+        const returnType = returnTypeFunction();
+        const type = Array.isArray(returnType)
+          ? (returnType[0] as Type)
+          : (returnType as Type);
 
-    const ST = createSortableType(
-      type,
-      `${capitalize(advancedOptions?.name ?? type.name)}_${name}`,
+        const ST = createSortableType(
+          type,
+          `${capitalize(advancedOptions?.name ?? type.name)}_${name}`,
+          level + 1,
+          getFilterableRelations(type),
+        );
+
+        Field(() => ST, { nullable: true })(GqlSort.prototype, propertyKey);
+      },
     );
-
-    Field(() => ST, { nullable: true })(GqlSort.prototype, propertyKey);
-  });
+  }
 
   SortStorage.set(name, GqlSort);
   return GqlSort as Type<SortType<T>>;

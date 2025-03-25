@@ -15,7 +15,7 @@ import { RoomService } from '../room/room.service';
 import { OffsetPaginationArgsType } from '@common/pagination/offset';
 import { SortType } from '@common/sort';
 import { FilterType } from '@common/filter';
-import { parseArgsToQuery } from '@common/typeorm-query-parser';
+import { getCount, getMany } from '@common/typeorm-query-parser';
 import { RoomMovieEntity } from './entities/room-movie.entity';
 import { MovieService } from '../movie/movie.service';
 import { CreateRoomMovieInput } from './dto/create-room-movie.input';
@@ -82,12 +82,7 @@ export class RoomMovieService {
   };
 
   count = async (filter?: FilterType<RoomMovieEntity>): Promise<number> => {
-    return parseArgsToQuery(
-      this.roomMovieRepository,
-      undefined,
-      undefined,
-      filter,
-    ).getCount();
+    return getCount(this.roomMovieRepository, filter);
   };
 
   create = async (input: CreateRoomMovieInput) => {
@@ -121,12 +116,7 @@ export class RoomMovieService {
     sort?: SortType<RoomMovieEntity>,
     filter?: FilterType<RoomMovieEntity>,
   ): Promise<RoomMovieEntity[]> => {
-    return parseArgsToQuery(
-      this.roomMovieRepository,
-      pagination,
-      sort,
-      filter,
-    ).getMany();
+    return getMany(this.roomMovieRepository, pagination, sort, filter);
   };
 
   readOne = async (

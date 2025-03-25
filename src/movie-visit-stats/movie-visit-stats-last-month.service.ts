@@ -6,7 +6,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MovieVisitStatsEntity } from './entities/movie-visit-stats.entity';
 import { Repository } from 'typeorm';
-import { parseArgsToQuery } from '@common/typeorm-query-parser';
+import { getCount, getMany } from '@common/typeorm-query-parser';
 
 @Injectable()
 export class MovieVisitStatsLastMonthService {
@@ -27,14 +27,16 @@ export class MovieVisitStatsLastMonthService {
     sort?: SortType<MovieVisitStatsLastMonthView>,
     pagination?: OffsetPaginationArgsType,
   ) => {
-    const qb = parseArgsToQuery(
+    const data = await getMany(
       this.movieVisitStatsLastMonthRepository,
       pagination,
       sort,
       filter,
     );
-    const { entities: data } = await qb.getRawAndEntities();
-    const count = await qb.getCount();
+    const count = await getCount(
+      this.movieVisitStatsLastMonthRepository,
+      filter,
+    );
 
     const { limit, offset } = pagination;
 
