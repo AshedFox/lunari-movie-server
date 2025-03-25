@@ -10,7 +10,7 @@ import { UserService } from '../user/user.service';
 import { OffsetPaginationArgsType } from '@common/pagination/offset';
 import { FilterType } from '@common/filter';
 import { SortType } from '@common/sort';
-import { parseArgsToQuery } from '@common/typeorm-query-parser';
+import { getCount, getMany } from '@common/typeorm-query-parser';
 
 @Injectable()
 export class MovieUserService {
@@ -22,12 +22,7 @@ export class MovieUserService {
   ) {}
 
   count = async (filter?: FilterType<MovieUserEntity>): Promise<number> => {
-    return parseArgsToQuery(
-      this.movieUserRepository,
-      undefined,
-      undefined,
-      filter,
-    ).getCount();
+    return getCount(this.movieUserRepository, filter);
   };
 
   create = async (
@@ -53,12 +48,7 @@ export class MovieUserService {
     sort?: SortType<MovieUserEntity>,
     filter?: FilterType<MovieUserEntity>,
   ): Promise<MovieUserEntity[]> => {
-    return parseArgsToQuery(
-      this.movieUserRepository,
-      pagination,
-      sort,
-      filter,
-    ).getMany();
+    return getMany(this.movieUserRepository, pagination, sort, filter);
   };
 
   readOne = async (
