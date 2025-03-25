@@ -1,6 +1,6 @@
 import { SortOptionsType } from './sort-options.type';
 
-type SortVariant<T> = T extends undefined
+export type SortVariant<T> = T extends undefined
   ? undefined
   : T extends Promise<infer U>
     ? SortType<U>
