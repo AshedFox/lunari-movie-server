@@ -55,7 +55,6 @@ export class SubscriptionService extends BaseService<
       price.stripePriceId,
       priceId,
       userId,
-      price.currencyId,
     );
 
     return session.url;
