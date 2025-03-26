@@ -7,7 +7,7 @@ import { ProductEntity } from '../../product/entities/product.entity';
 @Entity('products_prices')
 export class ProductPriceEntity {
   @Field(() => ID)
-  @PrimaryColumn({ length: 255 })
+  @PrimaryColumn({ type: 'uuid' })
   productId: string;
 
   @Field(() => ProductEntity)
