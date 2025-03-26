@@ -109,12 +109,13 @@ export class StripeService {
 
   createPurchaseSession = async (
     customerId: string,
+    stripePriceId: string,
     priceId: string,
     userId: string,
     movieId: string,
   ): Promise<stripe.Stripe.Checkout.Session> => {
     return this.stripe.checkout.sessions.create({
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: stripePriceId, quantity: 1 }],
       success_url: `${this.configService.get(
         'CLIENT_URL',
       )}/order/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -130,12 +131,13 @@ export class StripeService {
 
   createSubscriptionSession = async (
     customerId: string,
+    stripePriceId: string,
     priceId: string,
     userId: string,
     currencyId: string,
   ): Promise<stripe.Stripe.Checkout.Session> => {
     return this.stripe.checkout.sessions.create({
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: stripePriceId, quantity: 1 }],
       success_url: `${this.configService.get(
         'CLIENT_URL',
       )}/order/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -145,6 +147,7 @@ export class StripeService {
       subscription_data: {
         metadata: {
           userId,
+          priceId,
         },
       },
     });

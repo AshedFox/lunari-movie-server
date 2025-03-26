@@ -35,6 +35,7 @@ export class PurchaseService extends BaseService<
 
     const session = await this.stripeService.createPurchaseSession(
       customerId,
+      price.stripePriceId,
       priceId,
       userId,
       movieId,

@@ -50,7 +50,7 @@ export class SubscriptionService extends BaseService<
     const price = await this.priceService.readOne(priceId);
 
     const session = await this.stripeService.createSubscriptionSession(
-      user.customerId,
+      price.stripePriceId,
       priceId,
       userId,
       price.currencyId,
