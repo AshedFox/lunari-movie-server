@@ -120,6 +120,7 @@ export class StripeService {
     return this.stripe.checkout.sessions.create({
       line_items: [{ price: stripePriceId, quantity: 1 }],
       success_url: `${this.clientUrl}/purchase/success?sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${this.clientUrl}/purchase/cancel?sessionId={CHECKOUT_SESSION_ID}`,
       customer: customerId,
       mode: 'payment',
       metadata: {
@@ -140,6 +141,7 @@ export class StripeService {
     return this.stripe.checkout.sessions.create({
       line_items: [{ price: stripePriceId, quantity: 1 }],
       success_url: `${this.clientUrl}/subscribe/success?sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${this.clientUrl}/subscribe/cancel?sessionId={CHECKOUT_SESSION_ID}`,
       customer: customerId,
       mode: 'subscription',
       currency: currencyId,
