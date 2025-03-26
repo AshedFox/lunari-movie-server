@@ -31,7 +31,10 @@ export class PriceEntity {
   @Column({ type: 'int4' })
   amount: number;
 
-  @Field(() => PlanIntervalEnum, { nullable: true })
+  @FilterableField()
+  @Column({ default: true })
+  active: boolean;
+
   @Column({
     type: 'enum',
     enum: PlanIntervalEnum,
