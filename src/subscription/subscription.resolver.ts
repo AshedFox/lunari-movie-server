@@ -32,6 +32,12 @@ export class SubscriptionResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard)
+  @Query(() => SubscriptionEntity)
+  getUserSubscription(@CurrentUser() user: CurrentUserDto) {
+    return this.subscriptionService.readActiveForUser(user.id);
+  }
+
+  @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => String)
   createSubscriptionsManageLink(@CurrentUser() user: CurrentUserDto) {
     return this.subscriptionService.createManageLink(user.id);
