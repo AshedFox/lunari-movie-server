@@ -4,7 +4,7 @@ import {
   Entity,
   OneToMany,
   OneToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Relation,
 } from 'typeorm';
 import { PriceEntity } from '../../price/entities/price.entity';
@@ -15,7 +15,7 @@ import { ProductPriceEntity } from '../../product-price/entities/product-price.e
 @Entity('products')
 export class ProductEntity {
   @Field(() => ID)
-  @PrimaryColumn({ length: 255 })
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Field(() => ID)
@@ -32,4 +32,8 @@ export class ProductEntity {
   @HideField()
   @OneToMany(() => ProductPriceEntity, (productPrice) => productPrice.product)
   pricesConnection: Relation<ProductPriceEntity[]>;
+
+  @HideField()
+  @Column({ length: 255, unique: true })
+  stripeProductId: string;
 }

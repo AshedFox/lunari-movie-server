@@ -37,7 +37,7 @@ export class ProductService extends BaseService<
     const product = await this.stripeService.createProduct(movie.title);
 
     const productEntity = await this.productRepository.save({
-      id: product.id,
+      stripeProductId: product.id,
       movieId: input.movieId,
     });
 
@@ -46,7 +46,7 @@ export class ProductService extends BaseService<
         ...price,
         productId: product.id,
       });
-      await this.productPriceService.create(product.id, p.id);
+      await this.productPriceService.create(productEntity.id, p.id);
     }
 
     return productEntity;
