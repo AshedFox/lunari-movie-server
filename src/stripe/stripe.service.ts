@@ -136,7 +136,6 @@ export class StripeService {
     stripePriceId: string,
     priceId: string,
     userId: string,
-    currencyId: string,
   ): Promise<stripe.Stripe.Checkout.Session> => {
     return this.stripe.checkout.sessions.create({
       line_items: [{ price: stripePriceId, quantity: 1 }],
@@ -144,7 +143,6 @@ export class StripeService {
       cancel_url: `${this.clientUrl}/subscribe/cancel?sessionId={CHECKOUT_SESSION_ID}`,
       customer: customerId,
       mode: 'subscription',
-      currency: currencyId,
       subscription_data: {
         metadata: {
           userId,
