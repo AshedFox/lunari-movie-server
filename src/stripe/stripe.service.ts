@@ -37,6 +37,10 @@ export class StripeService {
     });
   };
 
+  removeProduct = (id: string) => {
+    return this.stripe.products.del(id);
+  };
+
   createPrice = (
     productId: string,
     currency: string,
