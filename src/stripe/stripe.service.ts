@@ -5,6 +5,7 @@ import * as stripe from 'stripe';
 @Injectable()
 export class StripeService {
   private readonly clientUrl: string;
+  private readonly webhookSecret: string;
   private readonly stripe: stripe.Stripe;
 
   constructor(private readonly configService: ConfigService) {
@@ -13,10 +14,15 @@ export class StripeService {
       { apiVersion: '2025-02-24.acacia' },
     );
     this.clientUrl = configService.getOrThrow<string>('CLIENT_URL');
+    this.webhookSecret = configService.getOrThrow<string>(
+      'STRIPE_WEBHOOK_SECRET',
+    );
   }
 
   getCheckoutSession = async (id: string) => {
-    return this.stripe.checkout.sessions.retrieve(id);
+    return this.stripe.checkout.sessions.retrieve(id, {
+      expand: ['subscription'],
+    });
   };
 
   getSubscription = async (id: string) => {
@@ -153,14 +159,13 @@ export class StripeService {
   };
 
   constructEvent = (
-    payload: any,
-    signature: string | string[],
-    webhookSecret: string,
+    payload: Buffer,
+    signature: string,
   ): stripe.Stripe.Event => {
     return this.stripe.webhooks.constructEvent(
       payload,
       signature,
-      webhookSecret,
+      this.webhookSecret,
     );
   };
 }
