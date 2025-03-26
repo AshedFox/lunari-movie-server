@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { PriceEntity } from '../../price/entities/price.entity';
 import { PlanPriceEntity } from '../../plan-price/entities/plan-price.entity';
-import { FilterableField } from '@common/filter';
+import { FilterableField, FilterableRelation } from '@common/filter';
 
 @ObjectType('Plan')
 @Entity('plans')
@@ -28,7 +28,7 @@ export class PlanEntity {
   @Field(() => [PriceEntity])
   prices: Relation<PriceEntity[]>;
 
-  @HideField()
+  @FilterableRelation(() => [PlanPriceEntity], { hide: true })
   @OneToMany(
     () => PlanPriceEntity,
     (subscriptionPrice) => subscriptionPrice.plan,
