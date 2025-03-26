@@ -97,6 +97,24 @@ export class SubscriptionService extends BaseService<
     return session.url;
   };
 
+  updateFromStripe = async (
+    stripeSubscriptionId: string,
+    input: Partial<SubscriptionEntity>,
+  ): Promise<SubscriptionEntity> => {
+    const entity = await this.subscriptionRepository.findOne({
+      where: { stripeSubscriptionId },
+    });
+
+    if (!entity) {
+      throw new NotFoundException();
+    }
+
+    return this.subscriptionRepository.save({
+      ...entity,
+      ...input,
+    });
+  };
+
   requestCancel = async (
     userId: string,
     subscriptionId: string,
