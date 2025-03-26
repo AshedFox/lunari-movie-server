@@ -7,7 +7,7 @@ import { PlanEntity } from '../../plan/entities/plan.entity';
 @Entity('plans_prices')
 export class PlanPriceEntity {
   @Field(() => ID)
-  @PrimaryColumn({ length: 255 })
+  @PrimaryColumn({ type: 'uuid' })
   planId: string;
 
   @Field(() => PlanEntity)

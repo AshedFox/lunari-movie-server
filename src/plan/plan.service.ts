@@ -28,7 +28,7 @@ export class PlanService extends BaseService<
     const product = await this.stripeService.createProduct(input.name);
 
     const plan = await this.planRepository.save({
-      id: product.id,
+      stripeProductId: product.id,
       name: input.name,
     });
 
@@ -37,7 +37,7 @@ export class PlanService extends BaseService<
         ...price,
         productId: product.id,
       });
-      await this.planPriceService.create(product.id, p.id);
+      await this.planPriceService.create(plan.id, p.id);
     }
 
     return plan;
