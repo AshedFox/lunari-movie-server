@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { Min, ValidateNested } from 'class-validator';
+import { IsUUID, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 @InputType()
@@ -15,6 +15,7 @@ class CreateProductInput_Price {
 @InputType()
 export class CreateProductInput {
   @Field()
+  @IsUUID()
   movieId: string;
 
   @Field(() => [CreateProductInput_Price])
