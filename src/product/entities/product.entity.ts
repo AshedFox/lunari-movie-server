@@ -18,6 +18,10 @@ export class ProductEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Field()
+  @Column({ default: true })
+  active: boolean;
+
   @Field(() => ID)
   @Column()
   movieId: string;
