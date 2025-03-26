@@ -28,7 +28,7 @@ export class SubscriptionEntity {
   status: SubscriptionStatusEnum;
 
   @Field()
-  @Column({ length: 255 })
+  @Column({ type: 'uuid' })
   priceId: string;
 
   @Field(() => PriceEntity)

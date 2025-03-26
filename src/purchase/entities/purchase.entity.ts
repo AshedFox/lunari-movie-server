@@ -22,7 +22,7 @@ export class PurchaseEntity {
   madeAt: Date;
 
   @Field()
-  @Column({ length: 255 })
+  @Column({ type: 'uuid' })
   priceId: string;
 
   @Field(() => PriceEntity)
