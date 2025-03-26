@@ -31,6 +31,12 @@ export class StripeService {
     });
   };
 
+  disactivateProduct = (id: string) => {
+    return this.stripe.products.update(id, {
+      active: false,
+    });
+  };
+
   createPrice = (
     productId: string,
     currency: string,
