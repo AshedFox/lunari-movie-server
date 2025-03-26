@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PriceEntity } from './entities/price.entity';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, EntityManager, Repository } from 'typeorm';
 import { BaseService } from '@common/services';
 import { StripeService } from '../stripe/stripe.service';
 import { CreatePriceInput } from './dto/create-price.input';
@@ -20,14 +20,21 @@ export class PriceService extends BaseService<
     super(priceRepository);
   }
 
-  create = async (input: CreatePriceInput): Promise<PriceEntity> => {
+  create = async (
+    input: CreatePriceInput,
+    entityManager?: EntityManager,
+  ): Promise<PriceEntity> => {
+    const repository = entityManager
+      ? entityManager.getRepository(PriceEntity)
+      : this.priceRepository;
+
     const stripePrice = await this.stripeService.createPrice(
       input.productId,
       input.currencyId,
       input.amount,
       input.interval,
     );
-    return this.priceRepository.save({
+    return repository.save({
       ...input,
       stripePriceId: stripePrice.id,
     });
