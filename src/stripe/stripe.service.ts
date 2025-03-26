@@ -52,6 +52,12 @@ export class StripeService {
     });
   };
 
+  disactivatePrice = (id: string) => {
+    return this.stripe.prices.update(id, {
+      active: false,
+    });
+  };
+
   createCustomer = async (
     email: string,
     name: string,
