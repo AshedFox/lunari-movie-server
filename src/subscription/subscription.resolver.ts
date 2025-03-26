@@ -52,6 +52,11 @@ export class SubscriptionResolver {
     return this.subscriptionService.createSession(user.id, priceId);
   }
 
+  @Mutation(() => Boolean)
+  activateSubscription(@Args('sessionId') sessionId: string) {
+    return this.subscriptionService.activate(sessionId);
+  }
+
   @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => Boolean)
   cancelSubscription(
