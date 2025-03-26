@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, HideField, ID, ObjectType } from '@nestjs/graphql';
 import {
   Column,
   Entity,
@@ -14,7 +14,7 @@ import { PriceEntity } from '../../price/entities/price.entity';
 @Entity('purchases')
 export class PurchaseEntity {
   @Field(() => ID)
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: number;
 
   @Field()
@@ -44,4 +44,8 @@ export class PurchaseEntity {
   @Field(() => MovieEntity)
   @ManyToOne(() => MovieEntity)
   movie: Relation<MovieEntity>;
+
+  @HideField()
+  @Column({ length: 255, unique: true })
+  stripePaymentId: string;
 }
