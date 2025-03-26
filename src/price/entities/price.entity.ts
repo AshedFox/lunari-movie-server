@@ -8,15 +8,16 @@ import {
 } from 'typeorm';
 import { CurrencyEntity } from '../../currency/entities/currency.entity';
 import { PlanIntervalEnum } from '@utils/enums/plan-interval.enum';
+import { FilterableField } from '@common/filter';
 
 @ObjectType('Price')
 @Entity('prices')
 export class PriceEntity {
-  @Field(() => ID)
+  @FilterableField(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Field()
+  @FilterableField()
   @Column({ type: 'char', length: 3 })
   currencyId: string;
 
@@ -27,7 +28,7 @@ export class PriceEntity {
   })
   currency: Relation<CurrencyEntity>;
 
-  @Field(() => Int)
+  @FilterableField(() => Int)
   @Column({ type: 'int4' })
   amount: number;
 
@@ -35,6 +36,7 @@ export class PriceEntity {
   @Column({ default: true })
   active: boolean;
 
+  @FilterableField(() => PlanIntervalEnum, { nullable: true })
   @Column({
     type: 'enum',
     enum: PlanIntervalEnum,
