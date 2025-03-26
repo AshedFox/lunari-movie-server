@@ -21,6 +21,10 @@ export class PlanEntity {
   @Column({ length: 255 })
   name: string;
 
+  @FilterableField()
+  @Column({ default: true })
+  active: boolean;
+
   @Field(() => [PriceEntity])
   prices: Relation<PriceEntity[]>;
 
