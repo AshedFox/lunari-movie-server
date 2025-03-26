@@ -4,6 +4,7 @@ import * as stripe from 'stripe';
 
 @Injectable()
 export class StripeService {
+  private readonly clientUrl: string;
   private readonly stripe: stripe.Stripe;
 
   constructor(private readonly configService: ConfigService) {
@@ -11,6 +12,7 @@ export class StripeService {
       configService.getOrThrow<string>('STRIPE_KEY'),
       { apiVersion: '2025-02-24.acacia' },
     );
+    this.clientUrl = configService.getOrThrow<string>('CLIENT_URL');
   }
 
   getCheckoutSession = async (id: string) => {
@@ -117,9 +119,7 @@ export class StripeService {
   ): Promise<stripe.Stripe.Checkout.Session> => {
     return this.stripe.checkout.sessions.create({
       line_items: [{ price: stripePriceId, quantity: 1 }],
-      success_url: `${this.configService.get(
-        'CLIENT_URL',
-      )}/order/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${this.clientUrl}/purchase/success?sessionId={CHECKOUT_SESSION_ID}`,
       customer: customerId,
       mode: 'payment',
       metadata: {
@@ -139,9 +139,7 @@ export class StripeService {
   ): Promise<stripe.Stripe.Checkout.Session> => {
     return this.stripe.checkout.sessions.create({
       line_items: [{ price: stripePriceId, quantity: 1 }],
-      success_url: `${this.configService.get(
-        'CLIENT_URL',
-      )}/order/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${this.clientUrl}/subscribe/success?sessionId={CHECKOUT_SESSION_ID}`,
       customer: customerId,
       mode: 'subscription',
       currency: currencyId,
