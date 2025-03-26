@@ -7,9 +7,10 @@ export class StripeService {
   private readonly stripe: stripe.Stripe;
 
   constructor(private readonly configService: ConfigService) {
-    this.stripe = new stripe.Stripe(configService.get<string>('STRIPE_KEY'), {
-      apiVersion: '2025-02-24.acacia',
-    });
+    this.stripe = new stripe.Stripe(
+      configService.getOrThrow<string>('STRIPE_KEY'),
+      { apiVersion: '2025-02-24.acacia' },
+    );
   }
 
   getCheckoutSession = async (id: string) => {
