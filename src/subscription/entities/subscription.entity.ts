@@ -1,14 +1,20 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import { Field, HideField, ID, ObjectType } from '@nestjs/graphql';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Relation,
+} from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity';
 import { PriceEntity } from '../../price/entities/price.entity';
-import { SubscriptionStatusEnum } from '@utils/enums/subscription-status.enum';
+import { SubscriptionStatusEnum } from '@utils/enums';
 
 @ObjectType('ServiceSubscription')
 @Entity('subscriptions')
 export class SubscriptionEntity {
   @Field(() => ID)
-  @PrimaryColumn({ length: 255 })
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Field()
@@ -42,4 +48,8 @@ export class SubscriptionEntity {
   @Field(() => UserEntity)
   @ManyToOne(() => UserEntity)
   user: Relation<UserEntity>;
+
+  @HideField()
+  @Column({ length: 255, unique: true })
+  stripeSubscriptionId: string;
 }
