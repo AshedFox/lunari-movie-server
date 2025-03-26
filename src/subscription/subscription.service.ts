@@ -25,7 +25,7 @@ export class SubscriptionService extends BaseService<
     super(subscriptionRepository);
   }
 
-  readActiveForUser = (userId: string): Promise<SubscriptionEntity> => {
+  readActiveForUser = (userId: string): Promise<SubscriptionEntity | null> => {
     return this.subscriptionRepository.findOneBy({
       status: SubscriptionStatusEnum.ACTIVE,
       userId,
