@@ -15,7 +15,7 @@ export class ProductPriceEntity {
   product: Relation<ProductEntity>;
 
   @Field(() => ID)
-  @PrimaryColumn({ length: 255 })
+  @PrimaryColumn({ type: 'uuid' })
   priceId: string;
 
   @Field(() => PriceEntity)

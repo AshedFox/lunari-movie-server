@@ -21,17 +21,15 @@ export class PriceService extends BaseService<
   }
 
   create = async (input: CreatePriceInput): Promise<PriceEntity> => {
-    const price = await this.stripeService.createPrice(
+    const stripePrice = await this.stripeService.createPrice(
       input.productId,
       input.currencyId,
       input.amount,
       input.interval,
     );
     return this.priceRepository.save({
-      id: price.id,
-      amount: price.unit_amount,
-      currencyId: price.currency,
-      interval: input.interval,
+      ...input,
+      stripePriceId: stripePrice.id,
     });
   };
 }

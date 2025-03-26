@@ -1,5 +1,11 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import { Field, HideField, ID, Int, ObjectType } from '@nestjs/graphql';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Relation,
+} from 'typeorm';
 import { CurrencyEntity } from '../../currency/entities/currency.entity';
 import { PlanIntervalEnum } from '@utils/enums/plan-interval.enum';
 
@@ -7,7 +13,7 @@ import { PlanIntervalEnum } from '@utils/enums/plan-interval.enum';
 @Entity('prices')
 export class PriceEntity {
   @Field(() => ID)
-  @PrimaryColumn({ length: 255 })
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Field()
@@ -33,4 +39,8 @@ export class PriceEntity {
     nullable: true,
   })
   interval?: PlanIntervalEnum;
+
+  @HideField()
+  @Column({ length: 255, unique: true })
+  stripePriceId: string;
 }
