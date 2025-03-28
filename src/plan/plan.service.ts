@@ -7,7 +7,7 @@ import { CreatePlanInput } from './dto/create-plan.input';
 import { PriceService } from '../price/price.service';
 import { BaseService } from '@common/services';
 import { PlanPriceService } from '../plan-price/plan-price.service';
-import { PriceEntity } from 'src/price/entities/price.entity';
+import { PriceEntity } from '../price/entities/price.entity';
 
 @Injectable()
 export class PlanService extends BaseService<
