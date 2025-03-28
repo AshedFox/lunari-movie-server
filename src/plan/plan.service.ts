@@ -70,12 +70,13 @@ export class PlanService extends BaseService<
 
       for (const price of created.prices) {
         try {
-          this.stripeService.disactivatePrice(price.stripePriceId);
+          await this.stripeService.disactivatePrice(price.stripePriceId);
         } catch (e) {
           console.error(e);
         }
       }
-      this.stripeService.removeProduct(created.plan.stripeProductId);
+
+      await this.stripeService.removeProduct(created.plan.stripeProductId);
     } finally {
       await queryRunner.release();
     }
