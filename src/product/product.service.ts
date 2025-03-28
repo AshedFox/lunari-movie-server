@@ -34,7 +34,9 @@ export class ProductService extends BaseService<
       throw new NotFoundError('Movie not found!');
     }
 
-    const product = await this.stripeService.createProduct(movie.title);
+    const product = await this.stripeService.createProduct(
+      `${movie.type} ${movie.title}`,
+    );
 
     const productEntity = await this.productRepository.save({
       stripeProductId: product.id,
