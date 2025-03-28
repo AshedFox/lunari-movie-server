@@ -1,5 +1,5 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
-import { IsEnum, Min, ValidateNested } from 'class-validator';
+import { IsEnum, Length, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PlanIntervalEnum } from '@utils/enums/plan-interval.enum';
 
@@ -20,6 +20,7 @@ class CreatePlanInput_Price {
 @InputType()
 export class CreatePlanInput {
   @Field()
+  @Length(2, 255)
   name: string;
 
   @Field(() => [CreatePlanInput_Price])

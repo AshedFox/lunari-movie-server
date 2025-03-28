@@ -18,6 +18,7 @@ import { PriceEntity } from '../price/entities/price.entity';
 import { LoadersFactory } from '../dataloader/decorators/loaders-factory.decorator';
 import { DataLoaderFactory } from '../dataloader/data-loader.factory';
 import { PlanPriceEntity } from '../plan-price/entities/plan-price.entity';
+import { GetPlansArgs } from './dto/get-plans.args';
 
 @Resolver(PlanEntity)
 export class PlanResolver {
@@ -36,8 +37,8 @@ export class PlanResolver {
   }
 
   @Query(() => [PlanEntity])
-  getPlans() {
-    return this.planService.readMany();
+  getPlans(@Args() { filter, sort }: GetPlansArgs) {
+    return this.planService.readMany(undefined, sort, filter);
   }
 
   @ResolveField(() => [PriceEntity])

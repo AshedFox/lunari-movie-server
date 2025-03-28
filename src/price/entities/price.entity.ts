@@ -1,16 +1,23 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, ManyToOne, PrimaryColumn, Relation } from 'typeorm';
+import { Field, HideField, ID, Int, ObjectType } from '@nestjs/graphql';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Relation,
+} from 'typeorm';
 import { CurrencyEntity } from '../../currency/entities/currency.entity';
 import { PlanIntervalEnum } from '@utils/enums/plan-interval.enum';
+import { FilterableField } from '@common/filter';
 
 @ObjectType('Price')
 @Entity('prices')
 export class PriceEntity {
-  @Field(() => ID)
-  @PrimaryColumn({ length: 255 })
+  @FilterableField(() => ID)
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Field()
+  @FilterableField()
   @Column({ type: 'char', length: 3 })
   currencyId: string;
 
@@ -21,11 +28,15 @@ export class PriceEntity {
   })
   currency: Relation<CurrencyEntity>;
 
-  @Field(() => Int)
+  @FilterableField(() => Int)
   @Column({ type: 'int4' })
   amount: number;
 
-  @Field(() => PlanIntervalEnum, { nullable: true })
+  @FilterableField()
+  @Column({ default: true })
+  active: boolean;
+
+  @FilterableField(() => PlanIntervalEnum, { nullable: true })
   @Column({
     type: 'enum',
     enum: PlanIntervalEnum,
@@ -33,4 +44,8 @@ export class PriceEntity {
     nullable: true,
   })
   interval?: PlanIntervalEnum;
+
+  @HideField()
+  @Column({ length: 255, unique: true })
+  stripePriceId: string;
 }
