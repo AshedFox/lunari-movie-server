@@ -121,6 +121,7 @@ export class SubscriptionService extends BaseService<
   ): Promise<boolean> => {
     const subscription = await this.subscriptionRepository.findOneBy({
       id: subscriptionId,
+      userId,
     });
 
     if (!subscription) {
