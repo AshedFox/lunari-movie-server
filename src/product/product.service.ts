@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { StripeService } from '../stripe/stripe.service';
 import { CreateProductInput } from './dto/create-product.input';
 import { MovieService } from '../movie/movie.service';
@@ -9,6 +9,7 @@ import { NotFoundError } from '@utils/errors';
 import { PriceService } from '../price/price.service';
 import { BaseService } from '@common/services';
 import { ProductPriceService } from '../product-price/product-price.service';
+import { PriceEntity } from '../price/entities/price.entity';
 
 @Injectable()
 export class ProductService extends BaseService<
@@ -17,6 +18,8 @@ export class ProductService extends BaseService<
   Partial<ProductEntity>
 > {
   constructor(
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
     private readonly stripeService: StripeService,
@@ -38,19 +41,62 @@ export class ProductService extends BaseService<
       `${movie.type} ${movie.title}`,
     );
 
-    const productEntity = await this.productRepository.save({
-      stripeProductId: product.id,
-      movieId: input.movieId,
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    for (const price of input.prices) {
-      const p = await this.priceService.create({
-        ...price,
-        productId: product.id,
-      });
-      await this.productPriceService.create(productEntity.id, p.id);
+    const created: {
+      product?: ProductEntity;
+      prices: PriceEntity[];
+    } = {
+      prices: [],
+    };
+
+    try {
+      created.product = await queryRunner.manager
+        .getRepository(ProductEntity)
+        .save({
+          stripeProductId: product.id,
+          movieId: input.movieId,
+        });
+
+      for (const price of input.prices) {
+        created.prices.push(
+          await this.priceService.create(
+            {
+              ...price,
+              productId: product.id,
+            },
+            queryRunner.manager,
+          ),
+        );
+      }
+      await this.productPriceService.createMany(
+        created.prices.map((p) => ({
+          productId: created.product.id,
+          priceId: p.id,
+        })),
+        queryRunner.manager,
+      );
+      await queryRunner.commitTransaction();
+
+      return created.product;
+    } catch {
+      await queryRunner.rollbackTransaction();
+
+      for (const price of created.prices) {
+        try {
+          await this.stripeService.disactivatePrice(price.stripePriceId);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      if (created?.product) {
+        await this.stripeService.removeProduct(created.product.stripeProductId);
+      }
+    } finally {
+      await queryRunner.release();
     }
-
-    return productEntity;
   };
 }
