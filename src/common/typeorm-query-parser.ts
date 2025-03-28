@@ -154,7 +154,11 @@ function applyFilters<T>(
             key,
             alias,
           );
-          qb.andWhere(where, params);
+          if (scope === 'and') {
+            qb.andWhere(where, params);
+          } else if (scope === 'or') {
+            qb.orWhere(where, params);
+          }
         } else if (metadata && entityManager) {
           const relation = metadata.relations.find(
             (rel) => rel.propertyName === key,
