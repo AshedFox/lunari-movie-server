@@ -13,7 +13,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import * as argon2 from 'argon2';
 import { SignUpInput } from './dto/sign-up.input';
 import { AuthResult } from './dto/auth.result';
-import ms from 'ms';
+import ms, { StringValue } from 'ms';
 import { ConfigService } from '@nestjs/config';
 import { StripeService } from '../stripe/stripe.service';
 import { LoginInput } from './dto/login.input';
@@ -43,10 +43,12 @@ export class AuthService {
     private readonly mailingService: MailingService,
   ) {
     this.refreshLifetime = ms(
-      this.configService.getOrThrow<string>('REFRESH_TOKEN_LIFETIME'),
+      this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_LIFETIME'),
     );
     this.resetPasswordTokenLifetime = ms(
-      this.configService.getOrThrow<string>('RESET_PASSWORD_TOKEN_LIFETIME'),
+      this.configService.getOrThrow<StringValue>(
+        'RESET_PASSWORD_TOKEN_LIFETIME',
+      ),
     );
   }
 

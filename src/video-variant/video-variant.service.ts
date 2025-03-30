@@ -82,7 +82,7 @@ export class VideoVariantService extends BaseService<
           type: 'info',
           message: `Successfully generated video profile ${videoProfile}`,
         });
-      } catch (err) {
+      } catch {
         failed.push(videoProfile);
 
         onEvent({

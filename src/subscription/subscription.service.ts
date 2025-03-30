@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { StripeService } from '../stripe/stripe.service';
@@ -8,6 +12,7 @@ import { SubscriptionEntity } from './entities/subscription.entity';
 import { BaseService } from '@common/services';
 import { PriceService } from '../price/price.service';
 import { SubscriptionStatusEnum } from '@utils/enums/subscription-status.enum';
+import Stripe from 'stripe';
 
 @Injectable()
 export class SubscriptionService extends BaseService<
@@ -25,7 +30,7 @@ export class SubscriptionService extends BaseService<
     super(subscriptionRepository);
   }
 
-  readActiveForUser = (userId: string): Promise<SubscriptionEntity> => {
+  readActiveForUser = (userId: string): Promise<SubscriptionEntity | null> => {
     return this.subscriptionRepository.findOneBy({
       status: SubscriptionStatusEnum.ACTIVE,
       userId,
@@ -42,21 +47,72 @@ export class SubscriptionService extends BaseService<
     return session.url;
   };
 
+  activate = async (sessionId: string) => {
+    const session = await this.stripeService.getCheckoutSession(sessionId);
+    const subscription = session.subscription as Stripe.Subscription;
+
+    if (session.status === 'complete') {
+      const active = await this.readActiveForUser(subscription.metadata.userId);
+
+      if (active && active.stripeSubscriptionId === subscription.id) {
+        throw new ConflictException('Already exits');
+      }
+      await this.create({
+        stripeSubscriptionId: subscription.id,
+        userId: subscription.metadata.userId,
+        status: SubscriptionStatusEnum.ACTIVE,
+        priceId: subscription.metadata.priceId,
+        periodStart: new Date(subscription.current_period_start * 1000),
+        periodEnd: new Date(subscription.current_period_end * 1000),
+      });
+      return true;
+    }
+
+    return false;
+  };
+
   createSession = async (userId: string, priceId: string): Promise<string> => {
     if (await this.exists({ userId, status: SubscriptionStatusEnum.ACTIVE })) {
       throw new AlreadyExistsError('User already have active subscription!');
     }
     const user = await this.userService.readOneById(userId);
     const price = await this.priceService.readOne(priceId);
+    let customerId = user.customerId;
+
+    if (!customerId) {
+      const customer = await this.stripeService.createCustomer(
+        user.email,
+        user.name,
+      );
+      customerId = customer.id;
+    }
 
     const session = await this.stripeService.createSubscriptionSession(
-      user.customerId,
+      customerId,
+      price.stripePriceId,
       priceId,
       userId,
-      price.currencyId,
     );
 
     return session.url;
+  };
+
+  updateFromStripe = async (
+    stripeSubscriptionId: string,
+    input: Partial<SubscriptionEntity>,
+  ): Promise<SubscriptionEntity> => {
+    const entity = await this.subscriptionRepository.findOne({
+      where: { stripeSubscriptionId },
+    });
+
+    if (!entity) {
+      throw new NotFoundException();
+    }
+
+    return this.subscriptionRepository.save({
+      ...entity,
+      ...input,
+    });
   };
 
   requestCancel = async (
@@ -65,6 +121,7 @@ export class SubscriptionService extends BaseService<
   ): Promise<boolean> => {
     const subscription = await this.subscriptionRepository.findOneBy({
       id: subscriptionId,
+      userId,
     });
 
     if (!subscription) {

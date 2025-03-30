@@ -1,4 +1,4 @@
-import { Float, Parent, ResolveField, Resolver } from '@nestjs/graphql';
+import { Float, Int, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { MovieEntity } from './entities/movie.entity';
 import { MediaEntity } from '../media/entities/media.entity';
 import { MoviePersonEntity } from '../movie-person/entities/movie-person.entity';
@@ -39,6 +39,16 @@ export class MovieInterfaceResolver {
       .load({ id: movie.id });
   }
 
+  @ResolveField(() => Int)
+  trailersCount(
+    @Parent() movie: MovieEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetCountLoader(TrailerEntity, 'movieId', 'id')
+      .load(movie.id);
+  }
+
   @ResolveField(() => [MovieReviewEntity])
   reviews(
     @Parent() movie: MovieEntity,
@@ -47,6 +57,16 @@ export class MovieInterfaceResolver {
     return loadersFactory
       .createOrGetLoader(MovieReviewEntity, 'movieId', MovieEntity, 'id')
       .load({ id: movie.id });
+  }
+
+  @ResolveField(() => Int)
+  reviewsCount(
+    @Parent() movie: MovieEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetCountLoader(MovieReviewEntity, 'movieId', 'id')
+      .load(movie.id);
   }
 
   @ResolveField(() => [MoviePersonEntity])
@@ -59,6 +79,16 @@ export class MovieInterfaceResolver {
       .load({ id: movie.id });
   }
 
+  @ResolveField(() => Int)
+  moviePersonsCount(
+    @Parent() movie: MovieEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetCountLoader(MoviePersonEntity, 'movieId', 'id')
+      .load(movie.id);
+  }
+
   @ResolveField(() => [MovieImageEntity])
   movieImages(
     @Parent() movie: MovieEntity,
@@ -67,6 +97,16 @@ export class MovieInterfaceResolver {
     return loadersFactory
       .createOrGetLoader(MovieImageEntity, 'movieId', MovieEntity, 'id')
       .load({ id: movie.id });
+  }
+
+  @ResolveField(() => Int)
+  movieImagesCount(
+    @Parent() movie: MovieEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetCountLoader(MovieImageEntity, 'movieId', 'id')
+      .load(movie.id);
   }
 
   @ResolveField(() => [GenreEntity])

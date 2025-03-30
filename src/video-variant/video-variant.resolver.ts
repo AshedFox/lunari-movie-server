@@ -108,7 +108,7 @@ export class VideoVariantResolver {
     }),
   })
   videoVariantsProgress(@Args('id', { type: () => Int }) id: number) {
-    return this.pubSub.asyncIterator<VideoVariantsProgressDto>(
+    return this.pubSub.asyncIterableIterator<VideoVariantsProgressDto>(
       `videoVariantsProgress_${id}`,
     );
   }

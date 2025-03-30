@@ -50,7 +50,7 @@ export class MediaService extends BaseService<
         ...media,
         url: url,
       });
-    } catch (err) {
+    } catch {
       await this.mediaRepository.remove(media);
       throw new Error('Failed to upload!');
     }
@@ -72,7 +72,7 @@ export class MediaService extends BaseService<
         ...media,
         url: url,
       });
-    } catch (err) {
+    } catch {
       await this.mediaRepository.remove(media);
       throw new Error('Failed to upload!');
     }

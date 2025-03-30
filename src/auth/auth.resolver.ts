@@ -52,7 +52,7 @@ export class AuthResolver {
     );
   }
 
-  @Throttle(1, 60)
+  @Throttle({ default: { limit: 60000, ttl: 1 } })
   @Mutation(() => Boolean)
   forgotPassword(@Args('email') email: string) {
     return this.authService.forgotPassword(email);

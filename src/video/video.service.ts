@@ -234,7 +234,7 @@ export class VideoService extends BaseService<
         }, {}),
         streamingOutDir,
       );
-    } catch (err) {
+    } catch {
       throw new Error(`Failed to generate streaming for video ${id}`);
     }
   };
@@ -295,7 +295,7 @@ export class VideoService extends BaseService<
           });
         }
       }
-    } catch (err) {
+    } catch {
       throw new Error(`Failed to upload files for video ${id}`);
     }
   };

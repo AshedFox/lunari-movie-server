@@ -38,6 +38,14 @@ export class PurchaseResolver {
   }
 
   @UseGuards(GqlJwtAuthGuard)
+  @Query(() => [PurchaseEntity])
+  getUserPurchases(@CurrentUser() user: CurrentUserDto) {
+    return this.purchaseService.readMany(undefined, undefined, {
+      userId: { eq: user.id },
+    });
+  }
+
+  @UseGuards(GqlJwtAuthGuard)
   @Query(() => Boolean)
   hasPurchase(
     @Args('movieId') movieId: string,

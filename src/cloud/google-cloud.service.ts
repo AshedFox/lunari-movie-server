@@ -13,11 +13,11 @@ export class GoogleCloudService {
 
   constructor(private readonly configService: ConfigService) {
     this.storage = new Storage({
-      projectId: configService.get('GCS_PROJECT_ID'),
-      keyFilename: configService.get('GCS_KEY_PATH'),
+      projectId: configService.getOrThrow('GCS_PROJECT_ID'),
+      keyFilename: configService.getOrThrow('GCS_KEY_PATH'),
     });
     this.bucket = this.storage.bucket(
-      this.configService.get('GCS_MEDIA_BUCKET'),
+      this.configService.getOrThrow('GCS_MEDIA_BUCKET'),
     );
   }
 

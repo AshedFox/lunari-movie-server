@@ -239,8 +239,9 @@ export class FfmpegService {
         .audioCodec(CODECS_LIBS[audioCodec])
         .noVideo();
 
-      language &&
+      if (language) {
         command.addOutputOption('-metadata:s:a:0', `language=${language}`);
+      }
 
       return new Promise<void>((resolve, reject) => {
         command
@@ -307,8 +308,9 @@ export class FfmpegService {
         ]);
       }
 
-      language &&
+      if (language) {
         command.addOutputOption('-metadata:s:v:0', `language=${language}`);
+      }
 
       return new Promise<void>((resolve, reject) => {
         command

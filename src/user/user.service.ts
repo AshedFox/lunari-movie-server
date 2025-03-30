@@ -9,7 +9,7 @@ import { AlreadyExistsError, NotFoundError } from '@utils/errors';
 import { OffsetPaginationArgsType } from '@common/pagination/offset';
 import { SortType } from '@common/sort';
 import { FilterType } from '@common/filter';
-import { parseArgsToQuery } from '@common/typeorm-query-parser';
+import { getCount, getMany } from '@common/typeorm-query-parser';
 import { StripeService } from '../stripe/stripe.service';
 
 @Injectable()
@@ -38,14 +38,13 @@ export class UserService {
     sort?: SortType<UserEntity>,
     filter?: FilterType<UserEntity>,
   ): Promise<PaginatedUsers> => {
-    const qb = parseArgsToQuery(this.userRepository, pagination, sort, filter);
-    const { entities: data } = await qb.getRawAndEntities();
-    const count = await qb.getCount();
+    const users = await getMany(this.userRepository, pagination, sort, filter);
+    const count = await getCount(this.userRepository, filter);
 
     const { limit, offset } = pagination;
 
     return {
-      nodes: data,
+      nodes: users,
       pageInfo: {
         totalCount: count,
         hasNextPage: count > limit + offset,

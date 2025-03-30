@@ -82,7 +82,7 @@ export class VideoAudioResolver {
     }),
   })
   audioVariantsProgress(@Args('id', { type: () => Int }) id: number) {
-    return this.pubSub.asyncIterator<AudioVariantsProgressDto>(
+    return this.pubSub.asyncIterableIterator<AudioVariantsProgressDto>(
       `audioVariantsProgress_${id}`,
     );
   }

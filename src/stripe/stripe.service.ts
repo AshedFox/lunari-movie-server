@@ -4,16 +4,25 @@ import * as stripe from 'stripe';
 
 @Injectable()
 export class StripeService {
+  private readonly clientUrl: string;
+  private readonly webhookSecret: string;
   private readonly stripe: stripe.Stripe;
 
   constructor(private readonly configService: ConfigService) {
-    this.stripe = new stripe.Stripe(configService.get<string>('STRIPE_KEY'), {
-      apiVersion: '2023-08-16',
-    });
+    this.stripe = new stripe.Stripe(
+      configService.getOrThrow<string>('STRIPE_KEY'),
+      { apiVersion: '2025-02-24.acacia' },
+    );
+    this.clientUrl = configService.getOrThrow<string>('CLIENT_URL');
+    this.webhookSecret = configService.getOrThrow<string>(
+      'STRIPE_WEBHOOK_SECRET',
+    );
   }
 
   getCheckoutSession = async (id: string) => {
-    return this.stripe.checkout.sessions.retrieve(id);
+    return this.stripe.checkout.sessions.retrieve(id, {
+      expand: ['subscription'],
+    });
   };
 
   getSubscription = async (id: string) => {
@@ -31,6 +40,16 @@ export class StripeService {
     });
   };
 
+  disactivateProduct = (id: string) => {
+    return this.stripe.products.update(id, {
+      active: false,
+    });
+  };
+
+  removeProduct = (id: string) => {
+    return this.stripe.products.del(id);
+  };
+
   createPrice = (
     productId: string,
     currency: string,
@@ -43,6 +62,12 @@ export class StripeService {
       unit_amount: amount,
       billing_scheme: 'per_unit',
       recurring: interval ? { interval } : undefined,
+    });
+  };
+
+  disactivatePrice = (id: string) => {
+    return this.stripe.prices.update(id, {
+      active: false,
     });
   };
 
@@ -93,15 +118,15 @@ export class StripeService {
 
   createPurchaseSession = async (
     customerId: string,
+    stripePriceId: string,
     priceId: string,
     userId: string,
     movieId: string,
   ): Promise<stripe.Stripe.Checkout.Session> => {
     return this.stripe.checkout.sessions.create({
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${this.configService.get(
-        'CLIENT_URL',
-      )}/order/success?session_id={CHECKOUT_SESSION_ID}`,
+      line_items: [{ price: stripePriceId, quantity: 1 }],
+      success_url: `${this.clientUrl}/purchase/success?sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${this.clientUrl}/purchase/cancel?sessionId={CHECKOUT_SESSION_ID}`,
       customer: customerId,
       mode: 'payment',
       metadata: {
@@ -114,35 +139,33 @@ export class StripeService {
 
   createSubscriptionSession = async (
     customerId: string,
+    stripePriceId: string,
     priceId: string,
     userId: string,
-    currencyId: string,
   ): Promise<stripe.Stripe.Checkout.Session> => {
     return this.stripe.checkout.sessions.create({
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${this.configService.get(
-        'CLIENT_URL',
-      )}/order/success?session_id={CHECKOUT_SESSION_ID}`,
+      line_items: [{ price: stripePriceId, quantity: 1 }],
+      success_url: `${this.clientUrl}/subscribe/success?sessionId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${this.clientUrl}/subscribe/cancel?sessionId={CHECKOUT_SESSION_ID}`,
       customer: customerId,
       mode: 'subscription',
-      currency: currencyId,
       subscription_data: {
         metadata: {
           userId,
+          priceId,
         },
       },
     });
   };
 
   constructEvent = (
-    payload: any,
-    signature: string | string[],
-    webhookSecret: string,
+    payload: Buffer,
+    signature: string,
   ): stripe.Stripe.Event => {
     return this.stripe.webhooks.constructEvent(
       payload,
       signature,
-      webhookSecret,
+      this.webhookSecret,
     );
   };
 }

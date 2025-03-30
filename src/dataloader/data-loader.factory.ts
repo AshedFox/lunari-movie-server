@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import { IndexType } from '@utils/types';
 import { camelCase, snakeCase } from 'typeorm/util/StringUtils';
 import { ArgsType } from '@common/args';
-import typeormQueryParser from '@common/typeorm-query-parser';
+import { applyArgs } from '@common/typeorm-query-parser';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { PaginationArgsType } from '@common/pagination';
 import { plainToInstance } from 'class-transformer';
@@ -48,10 +48,10 @@ export class DataLoaderFactory {
     if (relationFieldName) {
       childQb.innerJoinAndSelect(`c.${relationFieldName}`, 'r');
       if (args || pagination) {
-        typeormQueryParser.applyArgs(childQb, args ?? {}, pagination, 'r');
+        applyArgs(childQb, args ?? {}, pagination, 'r');
       }
     } else {
-      typeormQueryParser.applyArgs(childQb, args ?? {}, pagination, 'c');
+      applyArgs(childQb, args ?? {}, pagination, 'c');
     }
 
     return this.entityManager
@@ -360,7 +360,7 @@ export class DataLoaderFactory {
             .groupBy(snakeGroupKeyName)
             .where(`${snakeGroupKeyName} IN (:...keys)`, { keys });
 
-          extra && extra(qb);
+          extra?.(qb);
 
           const data = await qb.getRawMany();
 

@@ -103,7 +103,7 @@ export class VideoResolver {
     }),
   })
   streamingGenerationProgress(@Args('id', { type: () => Int }) id: number) {
-    return this.pubSub.asyncIterator<StreamingGenerationProgressDto>(
+    return this.pubSub.asyncIterableIterator<StreamingGenerationProgressDto>(
       `streamingGenerationProgress_${id}`,
     );
   }

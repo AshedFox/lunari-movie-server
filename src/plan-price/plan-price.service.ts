@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PlanPriceEntity } from './entities/plan-price.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 @Injectable()
 export class PlanPriceService {
@@ -15,6 +15,15 @@ export class PlanPriceService {
       priceId,
       planId,
     });
+  };
+
+  createMany = (
+    data: { planId: string; priceId: string }[],
+    entityManager?: EntityManager,
+  ): Promise<PlanPriceEntity[]> => {
+    return entityManager
+      ? entityManager.getRepository(PlanPriceEntity).save(data)
+      : this.planPriceRepository.save(data);
   };
 
   readOne = (priceId: string, planId: string) => {

@@ -231,21 +231,23 @@ export class RoomResolver {
     resolve: (value) => value,
   })
   roomPlaybackStarted(@Args('id', ParseUUIDPipe) id: string) {
-    return this.pubSub.asyncIterator<string>(`roomPlaybackStarted_${id}`);
+    return this.pubSub.asyncIterableIterator<string>(
+      `roomPlaybackStarted_${id}`,
+    );
   }
 
   @Subscription(() => RoomMovieEntity, {
     resolve: (value) => value,
   })
   roomPlaybackEnded(@Args('id', ParseUUIDPipe) id: string) {
-    return this.pubSub.asyncIterator<string>(`roomPlaybackEnded_${id}`);
+    return this.pubSub.asyncIterableIterator<string>(`roomPlaybackEnded_${id}`);
   }
 
   @Subscription(() => RoomEntity, {
     resolve: (value) => value,
   })
   roomDeleted(@Args('id', ParseUUIDPipe) id: string) {
-    return this.pubSub.asyncIterator<string>(`roomDeleted_${id}`);
+    return this.pubSub.asyncIterableIterator<string>(`roomDeleted_${id}`);
   }
 
   @ResolveField(() => [UserEntity])

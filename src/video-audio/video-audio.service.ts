@@ -81,7 +81,7 @@ export class VideoAudioService extends BaseService<
           type: 'info',
           message: `Successfully generated audio profile ${audioProfile}`,
         });
-      } catch (err) {
+      } catch {
         failed.push(audioProfile);
 
         onEvent({
