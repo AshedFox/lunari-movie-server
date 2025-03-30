@@ -1,11 +1,9 @@
-# Movie Catalog
-
-<div align="center"><img src="https://github.com/user-attachments/assets/7344ce47-d473-482f-bf56-3981ff893b87" alt="drawing" style="height:700px;"/></div>
+# Lunari Movies
 
 ## Description
 
 Backend part of web-application for watching and discovering films and series made using [NestJS](https://nestjs.com/) framework and [GraphQL](https://graphql.org/).
-Discover client [here](https://github.com/AshedFox/movie-catalog-client).
+Discover client [here](https://github.com/AshedFox/lunari-movie-client).
 
 
 Implements payments with [Stripe](https://stripe.com/), video files optimization and splitting into fragments with [ffmpeg](https://www.ffmpeg.org/), custom Dataloader soultion (much more effective for many-to-many relations), token-based auth (access + refresh tokens), complicated generation system, which helps to create services, inputs, args (filters, sort params, pagination params), and parse them to correct TypeOrm query.
@@ -13,7 +11,7 @@ Builds with high-performant [SWC](https://swc.rs/).
 
 ## Preparations
 
-If you want to use video files processing, you need to install ffmpeg library on your device from [here](https://www.ffmpeg.org/download.html).
+If you want to use video files processing, you need to install ffmpeg library on your device from [official website](https://www.ffmpeg.org/download.html).
 
 ## Installation
 
