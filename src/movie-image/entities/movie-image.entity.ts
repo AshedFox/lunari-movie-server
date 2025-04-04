@@ -32,12 +32,12 @@ export class MovieImageEntity {
   })
   type?: Relation<MovieImageTypeEntity>;
 
-  @FilterableField(() => ID)
+  @FilterableField()
   @Column({ type: 'uuid' })
   @Index()
   imageId: string;
 
-  @FilterableField(() => ID)
+  @FilterableField()
   @Column({ type: 'uuid' })
   @Index()
   movieId: string;
