@@ -296,9 +296,11 @@ const applySort = <T>(
   metadata?: EntityMetadata,
 ) => {
   const sortKeys = Object.keys(sort);
-  const primaryColumns = metadata.primaryColumns.filter(
-    (value) => !sortKeys.includes(value.propertyName),
-  );
+  const primaryColumns = metadata
+    ? metadata.primaryColumns.filter(
+        (value) => !sortKeys.includes(value.propertyName),
+      )
+    : [{ propertyName: 'id' }];
 
   for (const key of sortKeys) {
     applyFieldSort(qb, key, sort[key], alias, entityManager, metadata);
