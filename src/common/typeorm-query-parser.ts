@@ -414,20 +414,29 @@ export function getMany<T>(
  * @returns Passed query builder with applied pagination, sort and filters
  */
 export function applyArgs<T>(
+  repo: Repository<T>,
   qb: SelectQueryBuilder<T>,
   args: ArgsType<T>,
   pagination?: PaginationArgsType,
   alias?: string,
 ): SelectQueryBuilder<T> {
   const { filter, sort } = args;
+  const entityManager = repo.manager;
 
-  applySort(qb, sort ?? {}, alias ?? qb.alias);
+  applySort(qb, sort ?? {}, alias ?? qb.alias, entityManager, repo.metadata);
 
   if (pagination) {
     applyPagination(qb, pagination, alias ?? qb.alias);
   }
   if (filter) {
-    applyFilters(qb, filter, alias ?? qb.alias);
+    applyFilters(
+      qb,
+      filter,
+      alias ?? qb.alias,
+      'and',
+      entityManager,
+      repo.metadata,
+    );
   }
 
   return qb;

@@ -48,10 +48,22 @@ export class DataLoaderFactory {
     if (relationFieldName) {
       childQb.innerJoinAndSelect(`c.${relationFieldName}`, 'r');
       if (args || pagination) {
-        applyArgs(childQb, args ?? {}, pagination, 'r');
+        applyArgs(
+          this.entityManager.getRepository(ChildClass),
+          childQb,
+          args ?? {},
+          pagination,
+          'r',
+        );
       }
     } else {
-      applyArgs(childQb, args ?? {}, pagination, 'c');
+      applyArgs(
+        this.entityManager.getRepository(ChildClass),
+        childQb,
+        args ?? {},
+        pagination,
+        'c',
+      );
     }
 
     return this.entityManager
