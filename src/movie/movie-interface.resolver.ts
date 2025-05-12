@@ -6,6 +6,7 @@ import { GenreEntity } from '../genre/entities/genre.entity';
 import { StudioEntity } from '../studio/entities/studio.entity';
 import { MovieImageEntity } from '../movie-image/entities/movie-image.entity';
 import { TrailerEntity } from '../trailer/entities/trailer.entity';
+import { MovieVisitEntity } from '@/movie-visit/entities/movie-visit.entity';
 import { MovieReviewEntity } from '../movie-review/entities/movie-review.entity';
 import { CountryEntity } from '../country/entities/country.entity';
 import { CollectionEntity } from '../collection/entities/collection.entity';
@@ -16,6 +17,7 @@ import { MovieCountryEntity } from '../movie-country/entities/movie-country.enti
 import { MovieStudioEntity } from '../movie-studio/entities/movie-studio.entity';
 import { CollectionMovieEntity } from '../collection-movie/entities/collection-movie.entity';
 import { ProductEntity } from '../product/entities/product.entity';
+import { MovieStatsMaterializedView } from '@/movie-stats/entities/movie-stats.view';
 
 @Resolver(MovieEntity)
 export class MovieInterfaceResolver {
@@ -49,6 +51,16 @@ export class MovieInterfaceResolver {
       .load(movie.id);
   }
 
+  @ResolveField(() => [MovieVisitEntity])
+  visits(
+    @Parent() movie: MovieEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetLoader(MovieVisitEntity, 'movieId', MovieEntity, 'id')
+      .load({ id: movie.id });
+  }
+
   @ResolveField(() => [MovieReviewEntity])
   reviews(
     @Parent() movie: MovieEntity,
@@ -56,6 +68,21 @@ export class MovieInterfaceResolver {
   ) {
     return loadersFactory
       .createOrGetLoader(MovieReviewEntity, 'movieId', MovieEntity, 'id')
+      .load({ id: movie.id });
+  }
+
+  @ResolveField(() => [MovieReviewEntity])
+  stats(
+    @Parent() movie: MovieEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetLoader(
+        MovieStatsMaterializedView,
+        'movieId',
+        MovieEntity,
+        'id',
+      )
       .load({ id: movie.id });
   }
 

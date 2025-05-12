@@ -132,20 +132,6 @@ export class MovieResolver extends MovieInterfaceResolver {
   }
 
   @Query(() => [MovieEntity])
-  getMostViewedMovies(
-    @Args() { sort, filter, ...pagination }: GetMoviesOffsetArgs,
-  ) {
-    return this.movieService.readManyMostViewed(pagination);
-  }
-
-  @Query(() => [MovieEntity])
-  getMostReviewedMovies(
-    @Args() { sort, filter, ...pagination }: GetMoviesOffsetArgs,
-  ) {
-    return this.movieService.readManyMostReviewed(pagination);
-  }
-
-  @Query(() => [MovieEntity])
   getRandomMovies(
     @Args() { sort, filter, ...pagination }: GetMoviesOffsetArgs,
   ) {

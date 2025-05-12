@@ -39,7 +39,6 @@ import { MoviePersonTypeModule } from './movie-person-type/movie-person-type.mod
 import { CurrencyModule } from './currency/currency.module';
 import { RoomParticipantModule } from './room-participant/room-participant.module';
 import { RoomModule } from './room/room.module';
-import { MovieVisitStatsModule } from './movie-visit-stats/movie-visit-stats.module';
 import { LanguageModule } from './language/language.module';
 import { VideoModule } from './video/video.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
@@ -62,6 +61,8 @@ import { PlanPriceModule } from './plan-price/plan-price.module';
 import { StripeModule } from './stripe/stripe.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { MovieVisitModule } from './movie-visit/movie-visit.module';
+import { MovieStatsModule } from './movie-stats/movie-stats.module';
 
 @Module({
   imports: [
@@ -123,8 +124,8 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     RoomModule,
     RoomParticipantModule,
     RoomMovieModule,
-    MovieVisitStatsModule,
     VideoVariantModule,
+    MovieVisitModule,
     SubtitlesModule,
     PlanPriceModule,
     ProductPriceModule,
@@ -137,6 +138,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     VideoAudioModule,
     StripeModule,
     WebhookModule,
+    MovieStatsModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ErrorInterceptor },
