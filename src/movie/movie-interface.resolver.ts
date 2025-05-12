@@ -6,6 +6,7 @@ import { GenreEntity } from '../genre/entities/genre.entity';
 import { StudioEntity } from '../studio/entities/studio.entity';
 import { MovieImageEntity } from '../movie-image/entities/movie-image.entity';
 import { TrailerEntity } from '../trailer/entities/trailer.entity';
+import { MovieVisitEntity } from '@/movie-visit/entities/movie-visit.entity';
 import { MovieReviewEntity } from '../movie-review/entities/movie-review.entity';
 import { CountryEntity } from '../country/entities/country.entity';
 import { CollectionEntity } from '../collection/entities/collection.entity';
@@ -47,6 +48,16 @@ export class MovieInterfaceResolver {
     return loadersFactory
       .createOrGetCountLoader(TrailerEntity, 'movieId', 'id')
       .load(movie.id);
+  }
+
+  @ResolveField(() => [MovieVisitEntity])
+  visits(
+    @Parent() movie: MovieEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetLoader(MovieVisitEntity, 'movieId', MovieEntity, 'id')
+      .load({ id: movie.id });
   }
 
   @ResolveField(() => [MovieReviewEntity])

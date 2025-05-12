@@ -24,6 +24,7 @@ import { Expose } from 'class-transformer';
 import { MediaEntity } from '../../media/entities/media.entity';
 import { MovieTypeEnum } from '@utils/enums';
 import { TrailerEntity } from '../../trailer/entities/trailer.entity';
+import { MovieVisitEntity } from '@/movie-visit/entities/movie-visit.entity';
 import { MovieReviewEntity } from '../../movie-review/entities/movie-review.entity';
 import { CountryEntity } from '../../country/entities/country.entity';
 import { MovieCountryEntity } from '../../movie-country/entities/movie-country.entity';
@@ -112,6 +113,10 @@ export class MovieEntity {
   @Field(() => [TrailerEntity])
   @OneToMany(() => TrailerEntity, (trailer) => trailer.movie)
   trailers: Relation<TrailerEntity[]>;
+
+  @Field(() => [MovieVisitEntity])
+  @OneToMany(() => MovieVisitEntity, (stat) => stat.movie)
+  visits: Relation<MovieVisitEntity[]>;
 
   @Field(() => [MovieReviewEntity])
   @OneToMany(() => MovieReviewEntity, (review) => review.movie)
