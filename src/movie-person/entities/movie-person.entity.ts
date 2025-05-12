@@ -6,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   Relation,
+  Unique,
 } from 'typeorm';
 import { MoviePersonTypeEntity } from '../../movie-person-type/entities/movie-person-type.entity';
 import { MovieEntity } from '../../movie/entities/movie.entity';
@@ -14,6 +15,7 @@ import { FilterableField, FilterableRelation } from '@common/filter';
 
 @ObjectType('MoviePerson')
 @Entity('movies_persons')
+@Unique(['movieId', 'personId', 'typeId'])
 export class MoviePersonEntity {
   @FilterableField(() => ID)
   @PrimaryGeneratedColumn({ type: 'int8' })
