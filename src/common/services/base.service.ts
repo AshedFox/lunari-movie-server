@@ -27,7 +27,9 @@ export abstract class BaseService<
     try {
       return this.repository.save(input);
     } catch {
-      throw new AlreadyExistsError(`${this.repository.target} already exists!`);
+      throw new AlreadyExistsError(
+        `${this.repository.metadata.name} already exists!`,
+      );
     }
   };
 
@@ -47,7 +49,7 @@ export abstract class BaseService<
 
     if (!entity) {
       throw new NotFoundError(
-        `${this.repository.target} with id ${id} not found!`,
+        `${this.repository.metadata.name} with id ${id} not found!`,
       );
     }
 
@@ -83,7 +85,7 @@ export abstract class BaseService<
 
     if (!entity) {
       throw new NotFoundError(
-        `${this.repository.target} with id ${id} not found!`,
+        `${this.repository.metadata.name} with id ${id} not found!`,
       );
     }
 
