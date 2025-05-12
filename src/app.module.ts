@@ -61,6 +61,8 @@ import { PlanPriceModule } from './plan-price/plan-price.module';
 import { StripeModule } from './stripe/stripe.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { MovieVisitModule } from './movie-visit/movie-visit.module';
+import { MovieStatsModule } from './movie-stats/movie-stats.module';
 
 @Module({
   imports: [
@@ -123,6 +125,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     RoomParticipantModule,
     RoomMovieModule,
     VideoVariantModule,
+    MovieVisitModule,
     SubtitlesModule,
     PlanPriceModule,
     ProductPriceModule,
@@ -135,6 +138,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     VideoAudioModule,
     StripeModule,
     WebhookModule,
+    MovieStatsModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: ErrorInterceptor },
