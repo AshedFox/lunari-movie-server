@@ -39,7 +39,6 @@ import { MoviePersonTypeModule } from './movie-person-type/movie-person-type.mod
 import { CurrencyModule } from './currency/currency.module';
 import { RoomParticipantModule } from './room-participant/room-participant.module';
 import { RoomModule } from './room/room.module';
-import { MovieVisitStatsModule } from './movie-visit-stats/movie-visit-stats.module';
 import { LanguageModule } from './language/language.module';
 import { VideoModule } from './video/video.module';
 import { SubtitlesModule } from './subtitles/subtitles.module';
@@ -123,7 +122,6 @@ import { RedisModule } from '@nestjs-modules/ioredis';
     RoomModule,
     RoomParticipantModule,
     RoomMovieModule,
-    MovieVisitStatsModule,
     VideoVariantModule,
     SubtitlesModule,
     PlanPriceModule,
