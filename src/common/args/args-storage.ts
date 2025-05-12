@@ -4,5 +4,5 @@ import { ArgsType } from './args.type';
 export const ArgsStorage: Map<
   string,
   Type<ArgsType<unknown>>
-> = global.GqlFilterStorage ||
-(global.GqlFilterStorage = new Map<string, Type<ArgsType<unknown>>>());
+> = global.GqlArgsStorage ||
+(global.GqlArgsStorage = new Map<string, Type<ArgsType<unknown>>>());
