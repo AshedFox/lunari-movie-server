@@ -6,7 +6,7 @@ import { AccessModeEnum } from '@utils/enums/access-mode.enum';
 import { ParseUUIDPipe, UseGuards } from '@nestjs/common';
 import { GqlJwtAuthGuard } from '../auth/guards/gql-jwt-auth.guard';
 import { Role } from '../auth/decorators/roles.decorator';
-import { RoleEnum } from '@utils/enums';
+import { MediaTypeEnum, RoleEnum } from '@utils/enums';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { MovieInterfaceResolver } from './movie-interface.resolver';
 import {
@@ -14,11 +14,59 @@ import {
   RelayPaginatedMovies,
 } from './dto/paginated-movies';
 import { UpdateMovieInput } from './dto/update-movie.input';
+import { GoogleCloudService } from '@/cloud/google-cloud.service';
+import { MediaService } from '@/media/media.service';
+import { GraphQLUpload, FileUpload } from 'graphql-upload-minimal';
+import sharp from 'sharp';
 
 @Resolver(MovieEntity)
 export class MovieResolver extends MovieInterfaceResolver {
-  constructor(private readonly movieService: MovieService) {
+  constructor(
+    private readonly movieService: MovieService,
+    private readonly mediaService: MediaService,
+    private readonly cloudService: GoogleCloudService,
+  ) {
     super();
+  }
+
+  @Mutation(() => MovieEntity)
+  @Role([RoleEnum.Admin])
+  @UseGuards(GqlJwtAuthGuard, RolesGuard)
+  async updateMovieCover(
+    @Args('file', { type: () => GraphQLUpload }) file: FileUpload,
+    @Args('movieId') movieId: string,
+  ) {
+    const movie = await this.movieService.readOne(movieId);
+    const path = `images/movies/${movie.id}`;
+
+    const media = await this.mediaService.createEmpty(
+      { type: MediaTypeEnum.IMAGE },
+      path,
+      file.mimetype,
+    );
+
+    await this.cloudService.uploadStream(
+      file.createReadStream().pipe(
+        sharp()
+          .resize({
+            width: 1920,
+            fit: 'inside',
+          })
+          .webp(),
+      ),
+      `${path}/${media.id}`,
+      true,
+      file.mimetype,
+    );
+
+    if (movie.coverId) {
+      await this.mediaService.delete(movie.coverId);
+      await this.cloudService.delete(`${path}/${movie.coverId}`);
+    }
+
+    return this.movieService.update(movie.id, {
+      coverId: media.id,
+    });
   }
 
   @Query(() => OffsetPaginatedMovies)
