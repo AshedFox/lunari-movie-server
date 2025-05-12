@@ -17,6 +17,7 @@ import { MovieCountryEntity } from '../movie-country/entities/movie-country.enti
 import { MovieStudioEntity } from '../movie-studio/entities/movie-studio.entity';
 import { CollectionMovieEntity } from '../collection-movie/entities/collection-movie.entity';
 import { ProductEntity } from '../product/entities/product.entity';
+import { MovieStatsMaterializedView } from '@/movie-stats/entities/movie-stats.view';
 
 @Resolver(MovieEntity)
 export class MovieInterfaceResolver {
@@ -67,6 +68,21 @@ export class MovieInterfaceResolver {
   ) {
     return loadersFactory
       .createOrGetLoader(MovieReviewEntity, 'movieId', MovieEntity, 'id')
+      .load({ id: movie.id });
+  }
+
+  @ResolveField(() => [MovieReviewEntity])
+  stats(
+    @Parent() movie: MovieEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetLoader(
+        MovieStatsMaterializedView,
+        'movieId',
+        MovieEntity,
+        'id',
+      )
       .load({ id: movie.id });
   }
 

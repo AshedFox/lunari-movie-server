@@ -32,6 +32,7 @@ import { AgeRestrictionEnum } from '@utils/enums/age-restriction.enum';
 import { CollectionMovieEntity } from '../../collection-movie/entities/collection-movie.entity';
 import { CollectionEntity } from '../../collection/entities/collection.entity';
 import { ProductEntity } from '../../product/entities/product.entity';
+import { MovieStatsMaterializedView } from '@/movie-stats/entities/movie-stats.view';
 
 @InterfaceType('Movie', {
   resolveType(value) {
@@ -121,6 +122,10 @@ export class MovieEntity {
   @Field(() => [MovieReviewEntity])
   @OneToMany(() => MovieReviewEntity, (review) => review.movie)
   reviews: Relation<MovieReviewEntity[]>;
+
+  @FilterableRelation(() => [MovieStatsMaterializedView])
+  @OneToMany(() => MovieStatsMaterializedView, (stat) => stat.movie)
+  stats: Relation<MovieStatsMaterializedView[]>;
 
   @Field(() => [GenreEntity])
   genres: Relation<GenreEntity[]>;
