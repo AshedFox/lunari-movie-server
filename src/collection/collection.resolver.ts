@@ -171,6 +171,16 @@ export class CollectionResolver {
       .load({ id: collection.id });
   }
 
+  @ResolveField(() => Int)
+  reviewsCount(
+    @Parent() collection: CollectionEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetCountLoader(CollectionReviewEntity, 'collectionId', 'id')
+      .load(collection.id);
+  }
+
   @ResolveField(() => Float)
   async rating(
     @Parent() collection: CollectionEntity,
