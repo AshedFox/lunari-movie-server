@@ -146,6 +146,16 @@ export class CollectionResolver {
       });
   }
 
+  @ResolveField(() => Int)
+  moviesCount(
+    @Parent() collection: CollectionEntity,
+    @LoadersFactory() loadersFactory: DataLoaderFactory,
+  ) {
+    return loadersFactory
+      .createOrGetCountLoader(CollectionMovieEntity, 'collectionId', 'movieId')
+      .load(collection.id);
+  }
+
   @ResolveField(() => [CollectionReviewEntity])
   reviews(
     @Parent() collection: CollectionEntity,
