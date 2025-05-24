@@ -12,6 +12,7 @@ import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal';
 import { GoogleCloudService } from '../cloud/google-cloud.service';
 import { MediaTypeEnum } from '@utils/enums/media-type.enum';
 import { CreateUploadResult } from './dto/create-upload-result';
+import sharp from 'sharp';
 
 @Resolver(() => MediaEntity)
 export class MediaResolver {
@@ -24,7 +25,9 @@ export class MediaResolver {
   async uploadImage(
     @Args('file', { type: () => GraphQLUpload }) file: FileUpload,
   ) {
-    return this.mediaService.uploadImage((await file).createReadStream());
+    return this.mediaService.uploadImage(
+      file.createReadStream().pipe(sharp().resize(1920).webp()),
+    );
   }
 
   @UseGuards(GqlJwtAuthGuard)

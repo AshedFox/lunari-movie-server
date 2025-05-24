@@ -66,6 +66,8 @@ export class MediaService extends BaseService<
       const url = await this.cloudService.uploadStream(
         stream,
         `images/${media.id}`,
+        true,
+        'image/webp',
       );
 
       return this.mediaRepository.save({
