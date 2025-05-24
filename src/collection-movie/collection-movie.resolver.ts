@@ -12,9 +12,6 @@ import { ParseUUIDPipe, UseGuards } from '@nestjs/common';
 import { MovieEntity } from '../movie/entities/movie.entity';
 import { CollectionEntity } from '../collection/entities/collection.entity';
 import { GqlJwtAuthGuard } from '../auth/guards/gql-jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Role } from '../auth/decorators/roles.decorator';
-import { RoleEnum } from '@utils/enums';
 import { DataLoaderFactory } from '../dataloader/data-loader.factory';
 import { LoadersFactory } from '../dataloader/decorators/loaders-factory.decorator';
 
@@ -24,8 +21,7 @@ export class CollectionMovieResolver {
     private readonly collectionMovieService: CollectionMovieService,
   ) {}
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Role([RoleEnum.Admin, RoleEnum.Moderator])
+  @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => CollectionMovieEntity)
   createCollectionMovie(
     @Args('collectionId', { type: () => Int }) collectionId: number,
@@ -34,8 +30,7 @@ export class CollectionMovieResolver {
     return this.collectionMovieService.create(collectionId, movieId);
   }
 
-  @UseGuards(GqlJwtAuthGuard, RolesGuard)
-  @Role([RoleEnum.Admin, RoleEnum.Moderator])
+  @UseGuards(GqlJwtAuthGuard)
   @Mutation(() => CollectionMovieEntity)
   deleteCollectionMovie(
     @Args('collectionId', { type: () => Int }) collectionId: number,
