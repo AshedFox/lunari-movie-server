@@ -84,6 +84,13 @@ export class CollectionMovieService {
         `Collection movie with movieId "${movieId}" and collectionId "${collectionId}" not found!`,
       );
     }
-    return this.collectionMovieRepository.remove(collectionMovie);
+    const removed =
+      await this.collectionMovieRepository.remove(collectionMovie);
+
+    return {
+      ...removed,
+      collectionId,
+      movieId,
+    };
   };
 }
