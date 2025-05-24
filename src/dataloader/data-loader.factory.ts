@@ -47,7 +47,7 @@ export class DataLoaderFactory {
 
     if (relationFieldName) {
       childQb.innerJoinAndSelect(`c.${relationFieldName}`, 'r');
-      if (args || pagination) {
+      if ((args && (args.filter || args.sort)) || pagination) {
         applyArgs(
           this.entityManager.getRepository(ChildClass),
           childQb,
