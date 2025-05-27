@@ -1,6 +1,12 @@
 import { MovieVisitEntity } from './entities/movie-visit.entity';
 import { MovieVisitService } from './movie-visit.service';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  GqlExecutionContext,
+  Mutation,
+  Query,
+  Resolver,
+} from '@nestjs/graphql';
 import { CurrentUser } from '@/auth/decorators/current-user.decorator';
 import { CurrentUserDto } from '@/user/dto/current-user.dto';
 import { IpAddres } from '@/utils/decorators';
@@ -8,6 +14,7 @@ import { UseGuards } from '@nestjs/common';
 import { GqlTryJwtAuthGuard } from '@/auth/guards/gql-try-jwt-auth.guard';
 import { GetMoviesVisitsArgs } from './dto/get-movies-visits.args';
 import { PaginatedMoviesVisits } from './dto/paginated-movies-visits';
+import { days, Throttle } from '@nestjs/throttler';
 
 @Resolver(() => MovieVisitEntity)
 export class MovieVisitResolver {
@@ -15,6 +22,23 @@ export class MovieVisitResolver {
 
   @Mutation(() => MovieVisitEntity)
   @UseGuards(GqlTryJwtAuthGuard)
+  @Throttle({
+    default: {
+      limit: 1,
+      ttl: days(1),
+      generateKey: (context) => {
+        const gqlCtx = GqlExecutionContext.create(context);
+        const { req } = gqlCtx.getContext();
+        const args = gqlCtx.getArgs();
+
+        const userId = req.user?.id;
+        const ip = req.ip;
+        const movieId = args.movieId;
+
+        return `movieVisit:${userId}:${ip}:${movieId}`;
+      },
+    },
+  })
   trackMovieVisit(
     @IpAddres() ip: string,
     @Args('movieId') movieId: string,
