@@ -12,7 +12,7 @@ export class TypeOrmConfig implements TypeOrmOptionsFactory {
     return {
       type: 'postgres',
       url: this.configService.get('CONNECTION_STRING'),
-      synchronize: true,
+      synchronize: this.configService.get('NODE_ENV') === 'development',
       autoLoadEntities: true,
       logging: true,
       namingStrategy: new SnakeNamingStrategy(),
