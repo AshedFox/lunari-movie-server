@@ -12,6 +12,7 @@ import { ArgsType } from '@common/args';
 import { OffsetPaginationArgsType } from './pagination/offset';
 import { RelayPaginationArgsType } from './pagination/relay';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { snakeCase } from 'typeorm/util/StringUtils';
 
 // FILTERS
 
@@ -257,7 +258,7 @@ const applyFieldSort = <T>(
             (join) => join.alias.name === newAlias,
           )
         ) {
-          qb.leftJoin(`${alias}.${relation.propertyName}`, newAlias);
+          qb.leftJoin(`"${alias}"."${relation.propertyName}"`, newAlias);
         }
         const newMetadata = entityManager.connection.getMetadata(relation.type);
 
@@ -285,7 +286,7 @@ const applyFieldSort = <T>(
         ? 'NULLS LAST'
         : undefined;
 
-  qb.addOrderBy(`${alias}.${fieldName}`, direction, nulls);
+  qb.addOrderBy(`"${alias}"."${snakeCase(fieldName)}"`, direction, nulls);
 };
 
 const applySort = <T>(
@@ -423,7 +424,9 @@ export function applyArgs<T>(
   const { filter, sort } = args;
   const entityManager = repo.manager;
 
-  applySort(qb, sort ?? {}, alias ?? qb.alias, entityManager, repo.metadata);
+  if (sort) {
+    applySort(qb, sort, alias ?? qb.alias, entityManager, repo.metadata);
+  }
 
   if (pagination) {
     applyPagination(qb, pagination, alias ?? qb.alias);
