@@ -11,7 +11,7 @@ export class StripeService {
   constructor(private readonly configService: ConfigService) {
     this.stripe = new stripe.Stripe(
       configService.getOrThrow<string>('STRIPE_KEY'),
-      { apiVersion: '2025-02-24.acacia' },
+      { apiVersion: '2025-08-27.basil' },
     );
     this.clientUrl = configService.getOrThrow<string>('CLIENT_URL');
     this.webhookSecret = configService.getOrThrow<string>(

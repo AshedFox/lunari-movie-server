@@ -66,8 +66,8 @@ export class WebhookController {
               userId: subscription.metadata.userId,
               status: SubscriptionStatusEnum.ACTIVE,
               priceId: subscription.metadata.priceId,
-              periodStart: new Date(subscription.current_period_start * 1000),
-              periodEnd: new Date(subscription.current_period_end * 1000),
+              periodStart: new Date(subscription.start_date * 1000),
+              periodEnd: new Date(subscription.ended_at * 1000),
             });
           }
 
@@ -83,8 +83,8 @@ export class WebhookController {
           ) {
             await this.subscriptionService.updateFromStripe(subscription.id, {
               status: subscription.status as SubscriptionStatusEnum,
-              periodStart: new Date(subscription.current_period_start * 1000),
-              periodEnd: new Date(subscription.current_period_end * 1000),
+              periodStart: new Date(subscription.start_date * 1000),
+              periodEnd: new Date(subscription.ended_at * 1000),
             });
           }
 
