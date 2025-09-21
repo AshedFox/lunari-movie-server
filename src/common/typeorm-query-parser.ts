@@ -258,7 +258,7 @@ const applyFieldSort = <T>(
             (join) => join.alias.name === newAlias,
           )
         ) {
-          qb.leftJoin(`"${alias}"."${relation.propertyName}"`, newAlias);
+          qb.leftJoin(`${alias}.${relation.propertyName}`, newAlias);
         }
         const newMetadata = entityManager.connection.getMetadata(relation.type);
 
