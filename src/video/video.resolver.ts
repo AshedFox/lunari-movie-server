@@ -42,20 +42,16 @@ export class VideoResolver {
   createStreamingForVideoDirectly(
     @Args('input') input: CreateStreamingDirectlyInput,
   ) {
-    this.videoService.createStreamingDirectly(input, (data) =>
-      this.pubSub.publish(`streamingGenerationProgress_${input.id}`, data),
-    );
-    return true;
+    return this.videoService.createStreamingDirectly(input);
   }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
   @Role([RoleEnum.Admin])
   @Mutation(() => Boolean)
-  createStreamingForVideo(@Args('id', { type: () => Int }) id: number) {
-    this.videoService.createStreaming(id, (data) =>
-      this.pubSub.publish(`streamingGenerationProgress_${id}`, data),
-    );
-    return true;
+  createStreamingForVideoFromVariants(
+    @Args('id', { type: () => Int }) id: number,
+  ) {
+    return this.videoService.createStreamingFromVariants(id);
   }
 
   @UseGuards(GqlJwtAuthGuard, RolesGuard)
