@@ -10,9 +10,18 @@ import { VideoAudioEntity } from '../video-audio/entities/video-audio.entity';
 import { FfmpegService } from '../ffmpeg/ffmpeg.service';
 import { GoogleCloudService } from '../cloud/google-cloud.service';
 import { MediaService } from '../media/media.service';
-import { mkdir, readdir, rm } from 'fs/promises';
-import { StreamingGenerationProgressDto } from './dto/streaming-generation-progress.dto';
+import { readdir } from 'fs/promises';
 import { CreateStreamingDirectlyInput } from './dto/create-streaming-directly.input';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
+import {
+  JOB_DIRECT,
+  JOB_FROM_VARIANTS,
+  TranscodeDirectPayload,
+  TranscodeFromVariantsPayload,
+  VIDEO_QUEUE,
+} from './video-queue.types';
+import { VideoStatusEnum } from '@/utils/enums/video-status.enum';
 
 @Injectable()
 export class VideoService extends BaseService<
@@ -28,157 +37,48 @@ export class VideoService extends BaseService<
     private readonly ffmpegService: FfmpegService,
     private readonly cloudService: GoogleCloudService,
     private readonly mediaService: MediaService,
+    @InjectQueue(VIDEO_QUEUE) private videoProcessingQueue: Queue,
   ) {
     super(videoRepository);
   }
 
-  createStreamingDirectly = async (
-    { id, url, videoProfiles, audioProfiles }: CreateStreamingDirectlyInput,
-    onEvent: (data: StreamingGenerationProgressDto) => Promise<void>,
-  ) => {
-    const outDir = join(process.cwd(), 'assets', `video_${id}`, 'streaming');
-
-    const video = await this.videoRepository.findOneBy({ id });
+  createStreamingDirectly = async (input: CreateStreamingDirectlyInput) => {
+    const video = await this.videoRepository.findOneBy({ id: input.id });
 
     if (!video) {
-      return onEvent({
-        type: 'error',
-        message: `Video not exists`,
-      });
+      throw new Error('Video not found!');
     }
 
-    try {
-      onEvent({
-        type: 'info',
-        message: `Starting creation`,
-      });
-      await mkdir(outDir, { recursive: true });
+    await this.videoRepository.update(input.id, {
+      status: VideoStatusEnum.PROCESSING,
+    });
 
-      await this.ffmpegService.makeMPEGDashDirectly(
-        url,
-        outDir,
-        videoProfiles,
-        audioProfiles,
-      );
+    await this.videoProcessingQueue.add(JOB_DIRECT, {
+      videoId: input.id,
+      url: input.url,
+      videoProfiles: input.videoProfiles,
+      audioProfiles: input.audioProfiles,
+    } satisfies TranscodeDirectPayload);
 
-      await onEvent({
-        type: 'info',
-        message: `Successfully generated streaming`,
-      });
-
-      await onEvent({
-        type: 'info',
-        message: `Clearing previous streaming files and media`,
-      });
-
-      await this.clearStreamingFiles(id);
-
-      await onEvent({
-        type: 'info',
-        message: `Successfully cleared previous streaming files and media`,
-      });
-
-      await onEvent({
-        type: 'info',
-        message: `Uploading streaming files to the cloud`,
-      });
-
-      await this.uploadStreamingFiles(id, outDir);
-
-      await onEvent({
-        type: 'info',
-        message: `Successully uploaded streaming files to the cloud`,
-      });
-
-      await onEvent({
-        type: 'info',
-        message: `Successfully finished streaming creation`,
-      });
-    } catch (err) {
-      onEvent({
-        type: 'error',
-        message: err.message,
-      });
-    } finally {
-      rm(outDir, { recursive: true });
-    }
+    return true;
   };
 
-  createStreaming = async (
-    id: number,
-    onEvent: (data: StreamingGenerationProgressDto) => Promise<void>,
-  ): Promise<void> => {
-    const outDir = join(process.cwd(), 'assets', `video_${id}`, 'streaming');
-
-    const video = await this.videoRepository.findOneBy({ id });
+  createStreamingFromVariants = async (videoId: number) => {
+    const video = await this.videoRepository.findOneBy({ id: videoId });
 
     if (!video) {
-      return onEvent({
-        type: 'error',
-        message: `Video not exists`,
-      });
+      throw new Error('Video not found!');
     }
 
-    try {
-      await mkdir(outDir, { recursive: true });
+    await this.videoRepository.update(videoId, {
+      status: VideoStatusEnum.PROCESSING,
+    });
 
-      await onEvent({
-        type: 'info',
-        message: `Preparing data for streaming generation`,
-      });
+    await this.videoProcessingQueue.add(JOB_FROM_VARIANTS, {
+      videoId,
+    } satisfies TranscodeFromVariantsPayload);
 
-      const data = await this.prepareStreamingData(id);
-
-      await onEvent({
-        type: 'info',
-        message: `Starting streaming generation`,
-      });
-
-      await this.generateStreaming(
-        id,
-        outDir,
-        data.videoVariants,
-        data.audioVariants,
-      );
-
-      await onEvent({
-        type: 'info',
-        message: `Successfully generated streaming`,
-      });
-
-      await onEvent({
-        type: 'info',
-        message: `Clearing previous streaming files and media`,
-      });
-
-      await this.clearStreamingFiles(id);
-
-      await onEvent({
-        type: 'info',
-        message: `Successfully cleared previous streaming files and media`,
-      });
-
-      await onEvent({
-        type: 'info',
-        message: `Uploading streaming files to the cloud`,
-      });
-
-      await this.uploadStreamingFiles(id, outDir);
-
-      await onEvent({
-        type: 'info',
-        message: `Successully uploaded streaming files to the cloud`,
-      });
-
-      await onEvent({
-        type: 'info',
-        message: `Successfully finished streaming creation`,
-      });
-    } catch (err) {
-      await onEvent({ type: 'error', message: err.message });
-    } finally {
-      await rm(outDir, { recursive: true });
-    }
+    return true;
   };
 
   prepareStreamingData = async (
