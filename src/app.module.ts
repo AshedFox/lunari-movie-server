@@ -63,6 +63,7 @@ import { WebhookModule } from './webhook/webhook.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { MovieVisitModule } from './movie-visit/movie-visit.module';
 import { MovieStatsModule } from './movie-stats/movie-stats.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -89,6 +90,12 @@ import { MovieStatsModule } from './movie-stats/movie-stats.module';
       useClass: ThrottlerConfig,
     }),
     ScheduleModule.forRoot(),
+    BullModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        connection: { url: configService.getOrThrow<string>('REDIS_URL') },
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     CollectionModule,
     CollectionMovieModule,
