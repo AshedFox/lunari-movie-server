@@ -12,6 +12,7 @@ import { CloudModule } from '../cloud/cloud.module';
 import { SubtitlesModule } from '../subtitles/subtitles.module';
 import { BullModule } from '@nestjs/bullmq';
 import { VIDEO_QUEUE } from './video-queue.types';
+import { VideoProcessor } from './video.processor';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { VIDEO_QUEUE } from './video-queue.types';
     SubtitlesModule,
     MediaModule,
   ],
-  providers: [VideoResolver, VideoService],
+  providers: [VideoResolver, VideoService, VideoProcessor],
   exports: [VideoService],
 })
 export class VideoModule {}
