@@ -10,10 +10,16 @@ import { VideoVariantModule } from '../video-variant/video-variant.module';
 import { VideoAudioModule } from '../video-audio/video-audio.module';
 import { CloudModule } from '../cloud/cloud.module';
 import { SubtitlesModule } from '../subtitles/subtitles.module';
+import { BullModule } from '@nestjs/bullmq';
+import { VIDEO_QUEUE } from './video-queue.types';
+import { VideoProcessor } from './video.processor';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([VideoEntity]),
+    BullModule.registerQueue({
+      name: VIDEO_QUEUE,
+    }),
     PubSubModule,
     FfmpegModule,
     CloudModule,
@@ -22,7 +28,7 @@ import { SubtitlesModule } from '../subtitles/subtitles.module';
     SubtitlesModule,
     MediaModule,
   ],
-  providers: [VideoResolver, VideoService],
+  providers: [VideoResolver, VideoService, VideoProcessor],
   exports: [VideoService],
 })
 export class VideoModule {}

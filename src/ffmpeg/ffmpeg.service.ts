@@ -195,9 +195,6 @@ export class FfmpegService {
             .on('start', (commandLine) => {
               Logger.log('Spawned FFmpeg with command: ' + commandLine);
             })
-            .on('progress', (progress) => {
-              Logger.log(progress);
-            })
             .on('error', (err) => {
               Logger.error('Error:', err);
               reject(err);
