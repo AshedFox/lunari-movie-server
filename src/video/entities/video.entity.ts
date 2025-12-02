@@ -12,6 +12,7 @@ import { VideoVariantEntity } from '../../video-variant/entities/video-variant.e
 import { SubtitlesEntity } from '../../subtitles/entities/subtitles.entity';
 import { MediaEntity } from '../../media/entities/media.entity';
 import { VideoAudioEntity } from '../../video-audio/entities/video-audio.entity';
+import { VideoStatusEnum } from '@/utils/enums/video-status.enum';
 
 @ObjectType('Video')
 @Entity('videos')
@@ -19,6 +20,14 @@ export class VideoEntity {
   @FilterableField(() => ID)
   @PrimaryGeneratedColumn({ type: 'int4' })
   id: number;
+
+  @Column({
+    type: 'enum',
+    enum: VideoStatusEnum,
+    default: VideoStatusEnum.PENDING,
+  })
+  @Field(() => VideoStatusEnum)
+  status: VideoStatusEnum;
 
   @Field({ nullable: true })
   @Column({ type: 'uuid', nullable: true })
