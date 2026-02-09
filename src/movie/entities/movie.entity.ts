@@ -46,7 +46,7 @@ import { MovieStatsMaterializedView } from '@/movie-stats/entities/movie-stats.v
 })
 @Entity('movies')
 @TableInheritance({
-  column: { type: 'enum', enum: MovieTypeEnum, enumName: 'movie_type_enum' },
+  column: { type: 'enum', enum: MovieTypeEnum },
 })
 export class MovieEntity {
   @FilterableField(() => ID)
@@ -54,7 +54,7 @@ export class MovieEntity {
   id: string;
 
   @Field(() => MovieTypeEnum)
-  @Column({ type: 'enum', enum: MovieTypeEnum, enumName: 'movie_type_enum' })
+  @Column({ type: 'enum', enum: MovieTypeEnum })
   readonly type: MovieTypeEnum;
 
   @FilterableField()
@@ -82,7 +82,6 @@ export class MovieEntity {
   @Column({
     type: 'enum',
     enum: AgeRestrictionEnum,
-    enumName: 'age_restriction_enum',
   })
   ageRestriction?: AgeRestrictionEnum;
 
@@ -90,7 +89,6 @@ export class MovieEntity {
   @Column({
     type: 'enum',
     enum: AccessModeEnum,
-    enumName: 'access_mode_enum',
     default: AccessModeEnum.PRIVATE,
   })
   @Expose({ name: 'access_mode' })

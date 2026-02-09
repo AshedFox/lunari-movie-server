@@ -59,7 +59,6 @@ export class VideoAudioEntity {
   @Column({
     type: 'enum',
     enum: AudioProfileEnum,
-    enumName: 'audio_profile_enum',
   })
   profile: AudioProfileEnum;
 }

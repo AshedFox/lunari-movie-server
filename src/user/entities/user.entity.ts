@@ -56,7 +56,6 @@ export class UserEntity {
   @Column({
     type: 'enum',
     enum: RoleEnum,
-    enumName: 'role_enum',
     default: RoleEnum.User,
   })
   @Index()

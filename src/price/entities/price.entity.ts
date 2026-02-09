@@ -40,7 +40,6 @@ export class PriceEntity {
   @Column({
     type: 'enum',
     enum: PlanIntervalEnum,
-    enumName: 'plan_interval_enum',
     nullable: true,
   })
   interval?: PlanIntervalEnum;

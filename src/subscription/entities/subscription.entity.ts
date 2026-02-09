@@ -29,7 +29,6 @@ export class SubscriptionEntity {
   @Column({
     type: 'enum',
     enum: SubscriptionStatusEnum,
-    enumName: 'subscription_status',
   })
   status: SubscriptionStatusEnum;
 
