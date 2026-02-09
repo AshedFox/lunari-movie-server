@@ -60,7 +60,7 @@ import { PlanModule } from './plan/plan.module';
 import { PlanPriceModule } from './plan-price/plan-price.module';
 import { StripeModule } from './stripe/stripe.module';
 import { WebhookModule } from './webhook/webhook.module';
-import { RedisModule } from '@nestjs-modules/ioredis';
+import { RedisModule } from './redis';
 import { MovieVisitModule } from './movie-visit/movie-visit.module';
 import { MovieStatsModule } from './movie-stats/movie-stats.module';
 import { BullModule } from '@nestjs/bullmq';
@@ -82,7 +82,6 @@ import { BullModule } from '@nestjs/bullmq';
     RedisModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        type: 'single',
         url: configService.getOrThrow<string>('REDIS_URL'),
       }),
     }),
