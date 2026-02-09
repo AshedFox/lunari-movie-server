@@ -23,7 +23,7 @@
     "typeorm": "typeorm-ts-node-commonjs -d ./src/typeorm.data-source.ts"
   },
   "dependencies": {
-    "@apollo/server": "^4.11.3",
+    "@apollo/server": "^4.13.0",
     "@casl/ability": "^6.7.3",
     "@google-cloud/storage": "^7.17.1",
     "@nestjs-modules/ioredis": "^2.0.2",
