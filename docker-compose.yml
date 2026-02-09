@@ -1,0 +1,99 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lunari-server
+    restart: always
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT:-3000}
+      - CLIENT_URL=${CLIENT_URL}
+      - CONNECTION_STRING=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lunari}
+      - REDIS_URL=redis://redis:6379
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - ACCESS_TOKEN_LIFETIME=${ACCESS_TOKEN_LIFETIME}
+      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+      - REFRESH_TOKEN_LIFETIME=${REFRESH_TOKEN_LIFETIME}
+      - CONFIRMATION_TOKEN_SECRET=${CONFIRMATION_TOKEN_SECRET}
+      - CONFIRMATION_TOKEN_LIFETIME=${CONFIRMATION_TOKEN_LIFETIME}
+      - ROOM_INVITE_TOKEN_SECRET=${ROOM_INVITE_TOKEN_SECRET}
+      - ROOM_INVITE_TOKEN_LIFETIME=${ROOM_INVITE_TOKEN_LIFETIME}
+      - RESET_PASSWORD_TOKEN_SECRET=${RESET_PASSWORD_TOKEN_SECRET}
+      - RESET_PASSWORD_TOKEN_LIFETIME=${RESET_PASSWORD_TOKEN_LIFETIME}
+      - COOKIE_SECRET=${COOKIE_SECRET}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_SECURE=${MAIL_SECURE}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - GCS_PROJECT_ID=${GCS_PROJECT_ID}
+      - GCS_MEDIA_BUCKET=${GCS_MEDIA_BUCKET}
+      - GCS_KEY_PATH=${GCS_KEY_PATH}
+      - GCS_CREDENTIALS=${GCS_CREDENTIALS}
+      - STRIPE_KEY=${STRIPE_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - THROTTLER_TTL=${THROTTLER_TTL}
+      - THROTTLER_LIMIT=${THROTTLER_LIMIT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      migrator:
+        condition: service_completed_successfully
+    networks:
+      - lunari-network
+
+  migrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lunari-migrator
+    restart: no
+    command: sh -c "npm run migration:run:prod && npm run seed:prod"
+    environment:
+      - NODE_ENV=production
+      - CONNECTION_STRING=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lunari}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lunari-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: lunari-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-lunari}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-lunari}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lunari-network
+
+  redis:
+    image: redis:alpine
+    container_name: lunari-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - lunari-network
+
+volumes:
+  postgres_data:
+
+networks:
+  lunari-network:
