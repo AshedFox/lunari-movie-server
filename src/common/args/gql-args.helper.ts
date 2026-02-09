@@ -19,7 +19,9 @@ export function GqlArgs<
   P extends PaginationVariant = 'take-skip',
   PT = InferPaginationType<P>,
 >(classRef: Type<T>, paginationVariant?: P) {
-  const ExistingArgs = ArgsStorage.get(`${classRef.name}_${paginationVariant}`);
+  const ExistingArgs = ArgsStorage.get(
+    `${classRef.name}_${paginationVariant ?? 'take-skip'}`,
+  );
 
   if (ExistingArgs) {
     return ExistingArgs as Type<AT<T> & PT>;
