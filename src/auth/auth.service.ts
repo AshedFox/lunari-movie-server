@@ -3,7 +3,6 @@ import {
   ConflictException,
   Inject,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -22,6 +21,12 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { MailingService } from '../mailing/services/mailing.service';
 import { ResetPasswordInput } from './dto/reset-password.input';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import {
+  REMOVE_CUSTOMER_JOB,
+  STRIPE_CLEANUP_QUEUE,
+} from '../stripe/stripe.constants';
 
 @Injectable()
 export class AuthService {
@@ -41,6 +46,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly stripeService: StripeService,
     private readonly mailingService: MailingService,
+    @InjectQueue(STRIPE_CLEANUP_QUEUE) private readonly cleanupQueue: Queue,
   ) {
     this.refreshLifetime = ms(
       this.configService.getOrThrow<StringValue>('REFRESH_TOKEN_LIFETIME'),
@@ -129,12 +135,14 @@ export class AuthService {
 
       return this.makeAuthResult(user);
     } catch (e) {
-      await this.stripeService.removeCustomer(customer.id);
+      this.cleanupQueue.add(REMOVE_CUSTOMER_JOB, {
+        customerId: customer.id,
+      });
 
       if (e instanceof AlreadyExistsError) {
         throw new ConflictException('User already exists!');
       }
-      throw new InternalServerErrorException('Something went wrong!');
+      throw e;
     }
   };
 
