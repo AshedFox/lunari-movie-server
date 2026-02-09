@@ -25,7 +25,7 @@
   "dependencies": {
     "@apollo/server": "^4.11.3",
     "@casl/ability": "^6.7.3",
-    "@google-cloud/storage": "^7.17.1",
+    "@google-cloud/storage": "^7.19.0",
     "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/apollo": "^13.1.0",
