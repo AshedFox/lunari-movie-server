@@ -25,19 +25,25 @@ export abstract class BaseService<
 
   create = async (input: C): Promise<T> => {
     try {
-      return this.repository.save(input);
-    } catch {
-      throw new AlreadyExistsError(
-        `${this.repository.metadata.name} already exists!`,
-      );
+      return await this.repository.save(input);
+    } catch (err) {
+      if (err.code === '23505') {
+        throw new AlreadyExistsError(
+          `${this.repository.metadata.name} already exists!`,
+        );
+      }
+      throw err;
     }
   };
 
   createMany = async (input: C[]): Promise<T[]> => {
     try {
-      return this.repository.save(input);
-    } catch {
-      throw new AlreadyExistsError(`Already exists!`);
+      return await this.repository.save(input);
+    } catch (err) {
+      if (err.code === '23505') {
+        throw new AlreadyExistsError(`Already exists!`);
+      }
+      throw err;
     }
   };
 
