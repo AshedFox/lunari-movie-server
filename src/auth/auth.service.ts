@@ -195,13 +195,6 @@ export class AuthService {
 
     const token = await this.generateResetPasswordToken(user.id);
 
-    await this.redis.set(
-      `reset-password:${user.id}`,
-      token,
-      'PX',
-      this.resetPasswordTokenLifetime,
-    );
-
     await this.mailingService.sendPasswordReset(user.email, token);
     return true;
   };
