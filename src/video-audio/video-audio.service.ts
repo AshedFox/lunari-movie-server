@@ -12,7 +12,7 @@ import { GoogleCloudService } from '../cloud/google-cloud.service';
 import { GenerateVideoAudiosInput } from './dto/generate-video-audios.input';
 import { AudioVariantsProgressDto } from './dto/audio-variants-progress.dto';
 import { mkdir, rm } from 'fs/promises';
-import { VideoEntity } from 'src/video/entities/video.entity';
+import { VideoEntity } from '../video/entities/video.entity';
 
 @Injectable()
 export class VideoAudioService extends BaseService<

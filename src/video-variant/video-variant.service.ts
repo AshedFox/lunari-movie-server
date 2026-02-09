@@ -14,7 +14,7 @@ import { GoogleCloudService } from '../cloud/google-cloud.service';
 import { mkdir, rm } from 'fs/promises';
 import { GenerateVideoVariantsInput } from './dto/generate-video-variants.input';
 import { VideoVariantsProgressDto } from './dto/video-variants-progress.dto';
-import { VideoEntity } from 'src/video/entities/video.entity';
+import { VideoEntity } from '../video/entities/video.entity';
 
 @Injectable()
 export class VideoVariantService extends BaseService<
