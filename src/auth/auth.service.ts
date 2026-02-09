@@ -207,7 +207,7 @@ export class AuthService {
   };
 
   resetPassword = async ({ token, newPassword }: ResetPasswordInput) => {
-    const payload = this.refreshJwtService.verify<{ sub: string }>(token);
+    const payload = this.resetPasswordJwtService.verify<{ sub: string }>(token);
     const storedToken = await this.redis.getdel(
       `reset-password:${payload.sub}`,
     );
