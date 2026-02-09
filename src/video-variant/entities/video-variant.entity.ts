@@ -46,7 +46,6 @@ export class VideoVariantEntity {
   @Column({
     type: 'enum',
     enum: VideoProfileEnum,
-    enumName: 'video_profile_enum',
   })
   profile: VideoProfileEnum;
 }

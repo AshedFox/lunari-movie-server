@@ -1,13 +1,13 @@
 import { DataSource } from 'typeorm';
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
-dotenv.config();
+config();
 
 const dataSource = new DataSource({
   type: 'postgres',
-  entities: ['dist/**/*.entity{.js,.ts}'],
-  migrations: ['migrations/*{.js,.ts}'],
+  entities: [__dirname + '/**/*.{entity,view}{.js,.ts}'],
+  migrations: [__dirname + '/../migrations/*{.js,.ts}'],
   url: process.env.CONNECTION_STRING,
   namingStrategy: new SnakeNamingStrategy(),
 });

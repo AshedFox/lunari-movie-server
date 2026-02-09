@@ -40,7 +40,6 @@ export class EpisodeEntity {
   @Column({
     type: 'enum',
     enum: AgeRestrictionEnum,
-    enumName: 'age_restriction_enum',
   })
   ageRestriction?: AgeRestrictionEnum;
 
@@ -71,7 +70,6 @@ export class EpisodeEntity {
   @Column({
     type: 'enum',
     enum: AccessModeEnum,
-    enumName: 'access_mode_enum',
     default: AccessModeEnum.PRIVATE,
   })
   @Index({ where: "access_mode = 'PUBLIC'" })
