@@ -26,7 +26,6 @@
     "@apollo/server": "^4.13.0",
     "@casl/ability": "^6.7.3",
     "@google-cloud/storage": "^7.19.0",
-    "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/apollo": "^13.1.0",
     "@nestjs/bullmq": "^11.0.4",
@@ -100,8 +99,6 @@
   },
   "overrides": {
     "html-minifier": "npm:html-minifier-terser@^7.2.0",
-    "@nestjs/common": "^11.1.6",
-    "@nestjs/core": "^11.1.6",
     "rxjs": "^7.8.2"
   },
   "jest": {
