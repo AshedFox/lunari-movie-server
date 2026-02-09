@@ -48,7 +48,7 @@ export default defineConfig([
       sourceType: 'commonjs',
       parserOptions: {
         project: 'tsconfig.json',
-        tsconfigRootDir: './',
+        tsconfigRootDir: __dirname,
       },
     },
     rules: {
