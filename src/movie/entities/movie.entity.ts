@@ -24,7 +24,7 @@ import { Expose } from 'class-transformer';
 import { MediaEntity } from '../../media/entities/media.entity';
 import { MovieTypeEnum } from '@utils/enums';
 import { TrailerEntity } from '../../trailer/entities/trailer.entity';
-import { MovieVisitEntity } from '@/movie-visit/entities/movie-visit.entity';
+import { MovieVisitEntity } from '../../movie-visit/entities/movie-visit.entity';
 import { MovieReviewEntity } from '../../movie-review/entities/movie-review.entity';
 import { CountryEntity } from '../../country/entities/country.entity';
 import { MovieCountryEntity } from '../../movie-country/entities/movie-country.entity';
@@ -32,7 +32,7 @@ import { AgeRestrictionEnum } from '@utils/enums/age-restriction.enum';
 import { CollectionMovieEntity } from '../../collection-movie/entities/collection-movie.entity';
 import { CollectionEntity } from '../../collection/entities/collection.entity';
 import { ProductEntity } from '../../product/entities/product.entity';
-import { MovieStatsMaterializedView } from '@/movie-stats/entities/movie-stats.view';
+import { MovieStatsMaterializedView } from '../../movie-stats/entities/movie-stats.view';
 
 @InterfaceType('Movie', {
   resolveType(value) {
