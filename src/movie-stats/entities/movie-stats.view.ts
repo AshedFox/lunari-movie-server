@@ -52,7 +52,7 @@ export class MovieStatsMaterializedView {
   movieId: string;
 
   @FilterableRelation(() => MovieEntity)
-  @ManyToOne(() => MovieEntity, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+  @ManyToOne(() => MovieEntity)
   movie: Relation<MovieEntity>;
 
   @FilterableField()
