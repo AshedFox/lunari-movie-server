@@ -17,7 +17,7 @@ import { ConfigService } from '@nestjs/config';
 import { StripeService } from '../stripe/stripe.service';
 import { LoginInput } from './dto/login.input';
 import { AlreadyExistsError } from '@utils/errors';
-import { InjectRedis } from '@nestjs-modules/ioredis';
+import { InjectRedis } from '../redis';
 import Redis from 'ioredis';
 import { MailingService } from '../mailing/services/mailing.service';
 import { ResetPasswordInput } from './dto/reset-password.input';
