@@ -20,7 +20,7 @@ export class GqlTryJwtAuthGuard implements CanActivate {
     const request = this.getRequest(context);
     const token = this.extractTokenFromHeader(request);
 
-    if (token) {
+    if (!token) {
       return true;
     }
 
