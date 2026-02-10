@@ -9,12 +9,15 @@ export class TypeOrmConfig implements TypeOrmOptionsFactory {
   constructor(private readonly configService: ConfigService) {}
 
   createTypeOrmOptions(): Promise<TypeOrmModuleOptions> | TypeOrmModuleOptions {
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
     return {
       type: 'postgres',
       url: this.configService.get('CONNECTION_STRING'),
-      synchronize: this.configService.get('NODE_ENV') === 'development',
+      synchronize: !isProduction,
       autoLoadEntities: true,
-      logging: true,
+      logging: isProduction ? ['error', 'warn', 'migration'] : true,
+      maxQueryExecutionTime: isProduction ? 500 : undefined,
+      logger: 'advanced-console',
       namingStrategy: new SnakeNamingStrategy(),
     };
   }
