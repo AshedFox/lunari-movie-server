@@ -8,7 +8,7 @@ services:
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
       - PORT=${PORT:-3000}
       - CLIENT_URL=${CLIENT_URL}
       - CONNECTION_STRING=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-lunari}
@@ -31,12 +31,14 @@ services:
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - GCS_PROJECT_ID=${GCS_PROJECT_ID}
       - GCS_MEDIA_BUCKET=${GCS_MEDIA_BUCKET}
-      - GCS_KEY_PATH=${GCS_KEY_PATH}
+      - GCS_KEY_PATH=/app/secrets/gcs-key.json
       - GCS_CREDENTIALS=${GCS_CREDENTIALS}
       - STRIPE_KEY=${STRIPE_KEY}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - THROTTLER_TTL=${THROTTLER_TTL}
       - THROTTLER_LIMIT=${THROTTLER_LIMIT}
+    volumes:
+        - ${GCS_KEY_PATH:-./gcs_credentials.json}:/app/secrets/gcs-key.json:ro
     depends_on:
       postgres:
         condition: service_healthy
