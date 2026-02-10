@@ -12,6 +12,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { REDIS_CLIENT } from '../redis';
 import { UserEntity } from '../user/entities/user.entity';
 import { RoleEnum } from '@utils/enums';
 import { AlreadyExistsError } from '@utils/errors';
@@ -103,7 +104,7 @@ describe('AuthService', () => {
           provide: 'RESET_PASSWORD_JWT_SERVICE',
           useValue: resetPasswordJwtService,
         },
-        { provide: 'default_IORedisModuleConnectionToken', useValue: redis },
+        { provide: REDIS_CLIENT, useValue: redis },
         { provide: UserService, useValue: userService },
         { provide: StripeService, useValue: stripeService },
         { provide: MailingService, useValue: mailingService },
