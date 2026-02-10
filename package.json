@@ -108,7 +108,9 @@
   },
   "overrides": {
     "html-minifier": "npm:html-minifier-terser@^7.2.0",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "glob": "^13.0.0",
+    "mjml": "^5.0.0-alpha.10"
   },
   "jest": {
     "moduleFileExtensions": [
