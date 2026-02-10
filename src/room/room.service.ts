@@ -16,6 +16,7 @@ import { RoomParticipantService } from '../room-participant/room-participant.ser
 import { RoomMovieService } from '../room-movie/room-movie.service';
 import { RoomMovieEntity } from '../room-movie/entities/room-movie.entity';
 import { WrapperType } from '@utils/types';
+import type { StringValue } from 'ms';
 
 @Injectable()
 export class RoomService extends BaseService<
@@ -69,7 +70,9 @@ export class RoomService extends BaseService<
       {
         algorithm: 'HS512',
         secret: this.configService.get<string>('ROOM_INVITE_TOKEN_SECRET'),
-        expiresIn: this.configService.get<string>('ROOM_INVITE_TOKEN_LIFETIME'),
+        expiresIn: this.configService.get<StringValue>(
+          'ROOM_INVITE_TOKEN_LIFETIME',
+        ),
       },
     );
   };

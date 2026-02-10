@@ -6,10 +6,6 @@ import { DataLoaderFactory } from '../dataloader/data-loader.factory';
 import { ApolloDriverConfig } from '@nestjs/apollo';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
-import {
-  ApolloServerPluginLandingPageLocalDefault,
-  ApolloServerPluginLandingPageProductionDefault,
-} from '@apollo/server/plugin/landingPage/default';
 import { join } from 'path';
 
 @Injectable()
@@ -48,12 +44,7 @@ export class GraphQLConfig implements GqlOptionsFactory {
       subscriptions: {
         'graphql-ws': true,
       },
-      playground: false,
-      plugins: [
-        this.configService.get<string>('NODE_ENV') === 'development'
-          ? ApolloServerPluginLandingPageLocalDefault()
-          : ApolloServerPluginLandingPageProductionDefault(),
-      ],
+      graphiql: this.configService.get<string>('NODE_ENV') === 'development',
     };
   }
 }

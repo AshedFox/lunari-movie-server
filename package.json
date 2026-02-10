@@ -31,11 +31,12 @@
     "migration:revert:prod": "npm run typeorm migration:revert -- -d dist/typeorm.data-source.js"
   },
   "dependencies": {
-    "@apollo/server": "^4.13.0",
+    "@apollo/server": "^5.4.0",
+    "@as-integrations/express5": "^1.1.2",
     "@casl/ability": "^6.7.3",
     "@google-cloud/storage": "^7.19.0",
     "@nestjs-modules/mailer": "^2.0.2",
-    "@nestjs/apollo": "^13.1.0",
+    "@nestjs/apollo": "^13.2.4",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.1.6",
     "@nestjs/config": "^4.0.3",
@@ -53,7 +54,7 @@
     "cookie-parser": "^1.4.7",
     "dataloader": "^2.2.3",
     "fluent-ffmpeg": "^2.1.3",
-    "graphql": "^16.11.0",
+    "graphql": "^16.12.0",
     "graphql-subscriptions": "^3.0.0",
     "graphql-upload-minimal": "^1.6.1",
     "graphql-ws": "^6.0.6",
@@ -65,11 +66,10 @@
     "nodemailer": "^7.0.11",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
-    "rimraf": "^6.0.1",
     "rxjs": "^7.8.2",
     "sharp": "^0.34.3",
     "stripe": "^18.5.0",
-    "typeorm": "^0.3.26",
+    "typeorm": "^0.3.28",
     "typeorm-naming-strategies": "^4.1.0",
     "ws": "^8.18.3"
   },
@@ -97,9 +97,10 @@
     "eslint-plugin-prettier": "^5.5.4",
     "jest": "30.1.3",
     "prettier": "^3.6.2",
+    "rimraf": "^6.1.2",
     "source-map-support": "^0.5.21",
     "supertest": "^7.1.4",
-    "ts-jest": "29.4.2",
+    "ts-jest": "^29.4.6",
     "ts-loader": "^9.5.4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "4.2.0",
@@ -107,7 +108,9 @@
   },
   "overrides": {
     "html-minifier": "npm:html-minifier-terser@^7.2.0",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "glob": "^13.0.0",
+    "mjml": "^5.0.0-alpha.10"
   },
   "jest": {
     "moduleFileExtensions": [
