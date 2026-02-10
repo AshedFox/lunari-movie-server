@@ -24,9 +24,9 @@ import { AccessModeEnum } from '@utils/enums/access-mode.enum';
 import { MovieInterfaceResolver } from '../movie/movie-interface.resolver';
 import { LoadersFactory } from '../dataloader/decorators/loaders-factory.decorator';
 import { DataLoaderFactory } from '../dataloader/data-loader.factory';
-import { GetSeasonsArgs } from 'src/season/dto/get-seasons.args';
-import { PaginatedSeasons } from 'src/season/dto/paginated-seasons';
-import { PaginatedEpisodes } from 'src/episode/dto/paginated-episodes';
+import { GetSeasonsArgs } from '../season/dto/get-seasons.args';
+import { PaginatedSeasons } from '../season/dto/paginated-seasons';
+import { PaginatedEpisodes } from '../episode/dto/paginated-episodes';
 
 @Resolver(SeriesEntity)
 export class SeriesResolver extends MovieInterfaceResolver {
