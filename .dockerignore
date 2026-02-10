@@ -13,3 +13,4 @@ LICENSE
 coverage
 test
 eslint.config.mjs
+gcs_credentials.json

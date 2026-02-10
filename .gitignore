@@ -34,3 +34,6 @@ lerna-debug.log*
 .env
 .env.*
 !.env.template
+
+# Google Cloud credentials
+gcs_credentials.json
