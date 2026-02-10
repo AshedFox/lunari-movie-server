@@ -6,7 +6,7 @@ import { StripeService } from '../stripe/stripe.service';
 import { UserService } from '../user/user.service';
 import { BaseService } from '@common/services';
 import { AlreadyExistsError } from '@utils/errors';
-import { PriceService } from 'src/price/price.service';
+import { PriceService } from '../price/price.service';
 
 @Injectable()
 export class PurchaseService extends BaseService<
