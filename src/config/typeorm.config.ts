@@ -3,6 +3,7 @@ import { TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm/dist/interfaces/typeorm-options.interface';
+import { join } from 'path';
 
 @Injectable()
 export class TypeOrmConfig implements TypeOrmOptionsFactory {
@@ -15,6 +16,7 @@ export class TypeOrmConfig implements TypeOrmOptionsFactory {
       url: this.configService.get('CONNECTION_STRING'),
       synchronize: !isProduction,
       autoLoadEntities: true,
+      entities: [join(__dirname, '..', '**', '*.{entity,view}.{ts,js}')],
       logging: isProduction ? ['error', 'warn', 'migration'] : true,
       maxQueryExecutionTime: isProduction ? 500 : undefined,
       logger: 'advanced-console',

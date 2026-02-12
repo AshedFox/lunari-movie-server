@@ -18,21 +18,24 @@ import { MoviePersonTypeEntity } from '../movie-person-type/entities/movie-perso
 @Injectable()
 export class SeedingService {
   private readonly logger = new Logger(SeedingService.name);
+  private readonly countryRepository: Repository<CountryEntity>;
+  private readonly genreRepository: Repository<GenreEntity>;
+  private readonly currencyRepository: Repository<CurrencyEntity>;
+  private readonly languageRepository: Repository<LanguageEntity>;
+  private readonly movieImageTypeRepository: Repository<MovieImageTypeEntity>;
+  private readonly moviePersonTypeRepository: Repository<MoviePersonTypeEntity>;
 
-  constructor(
-    @InjectRepository(CountryEntity)
-    private readonly countryRepository: Repository<CountryEntity>,
-    @InjectRepository(GenreEntity)
-    private readonly genreRepository: Repository<GenreEntity>,
-    @InjectRepository(CurrencyEntity)
-    private readonly currencyRepository: Repository<CurrencyEntity>,
-    @InjectRepository(LanguageEntity)
-    private readonly languageRepository: Repository<LanguageEntity>,
-    @InjectRepository(MovieImageTypeEntity)
-    private readonly movieImageTypeRepository: Repository<MovieImageTypeEntity>,
-    @InjectRepository(MoviePersonTypeEntity)
-    private readonly moviePersonTypeRepository: Repository<MoviePersonTypeEntity>,
-  ) {}
+  constructor(private readonly dataSource: DataSource) {
+    this.countryRepository = this.dataSource.getRepository(CountryEntity);
+    this.genreRepository = this.dataSource.getRepository(GenreEntity);
+    this.currencyRepository = this.dataSource.getRepository(CurrencyEntity);
+    this.languageRepository = this.dataSource.getRepository(LanguageEntity);
+    this.movieImageTypeRepository =
+      this.dataSource.getRepository(MovieImageTypeEntity);
+    this.moviePersonTypeRepository = this.dataSource.getRepository(
+      MoviePersonTypeEntity,
+    );
+  }
 
   async seed() {
     await this.seedCurrencies();
