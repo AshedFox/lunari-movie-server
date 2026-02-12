@@ -22,6 +22,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "ts-node -r tsconfig-paths/register src/seed.ts",
     "seed:prod": "node dist/seed.js",
+    "seed:test": "ts-node -r tsconfig-paths/register src/seed-test.ts",
+    "seed:test:prod": "node dist/seed-test.js",
     "typeorm": "typeorm-ts-node-commonjs",
     "migration:create": "npm run typeorm migration:create",
     "migration:generate": "npm run typeorm migration:generate -- -d ./src/typeorm.data-source.ts",
