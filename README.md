@@ -4,93 +4,110 @@
 
 Backend part of Lunari Movies application for watching and discovering films and series made with [NestJS](https://nestjs.com/) and [GraphQL](https://graphql.org/).
 
-Implements payments with [Stripe](https://stripe.com/), video files optimization and splitting into fragments with [ffmpeg](https://www.ffmpeg.org/), custom Dataloader soultion (much more effective for many-to-many relations), token-based auth (access + refresh tokens) and powerful generation system for services, args and many other.
+Implements payments with [Stripe](https://stripe.com/), video files optimization and splitting into fragments with [ffmpeg](https://www.ffmpeg.org/), custom Dataloader solution, token-based auth (access + refresh tokens) and powerful generation system for services, args and many other.
 
 > Frontend repository: [lunari-movie-client](https://github.com/AshedFox/lunari-movie-client)
 
 ## Tech Stack
 
-- [NestJS](https://nestjs.com/)
-- [GraphQL](https://graphql.org/)
-- [TypeORM](https://typeorm.io/)
-- [PostgreSQL](https://www.postgresql.org/)
-- [Redis](https://redis.io/)
-- [JWT](https://jwt.io/)
-- [FFmpeg](https://ffmpeg.org/)
-- [Stripe](https://stripe.com/)
-- [Google Cloud Storage](https://cloud.google.com/storage)
+- **[NestJS](https://nestjs.com/)** - Main framework
+- **[GraphQL](https://graphql.org/)** - API Query language
+- **[TypeORM](https://typeorm.io/)** - ORM
+- **[PostgreSQL](https://www.postgresql.org/)** - Database
+- **[Redis](https://redis.io/)** - Caching & Message Broker
+- **[BullMQ](https://docs.bullmq.io/)** - Queues
+- **[JWT](https://jwt.io/)** - Authentication
+- **[FFmpeg](https://ffmpeg.org/)** - Video processing
+- **[Stripe](https://stripe.com/)** - Payments
+- **[Google Cloud Storage](https://cloud.google.com/storage)** - File storage
+- **[Docker](https://www.docker.com/)** - Containerization
 
 ## Features
 
-- Registration, authorization (access/refresh JWT), email confirmation.
-- Password reset and change.
-- User role model (admin, moderator, user).
-- CASL and guards to control access.
-- User profile with base information and avatar.
-- CRUD for films and series (including series hierarchy `series -> season -> episode`).
-- Access modes (public/private) and age restrictions for movies.
-- Random films and series selection.
-- Most popular movies selection with special formula, taking into account visits, reviews and bookmarks (each has different weight), and also time.
-- Various content metadata: genres, studios, conutries, persons with different roles, images of different types, trailers.
-- Movies reviews and rating.
-- Different movies watchlists (watched, bookmarked, favorite).
-- Video and audio tracks generation of different quality, resolution and language with ffmpeg.
-- DASH manifest generation.
-- Real-time generation progress monitoring.
-- System and user collections of movies, CRUD operations for them.
-- Collections reviews and rating.
-- Rooms for co-viewing movies with synchronization between participants.
-- Room playlist and invitations management.
-- Subscriptions and one-time movies purchases with Stripe.
-- Images processing with Sharp.
-- Google Cloud Storage integration for files storage.
-- Powerful generation system for GraphQL args: generate filters, sort and pagination with special factory funcitons and custom decorators. Support generated classes caching.
-- Rate limiting and throttling
-- Nested queries optimization with custom optimized DataLoader implementation.
-- CASL and guards to control access
+- **Authentication**: Registration, authorization (access/refresh JWT), email confirmation, password reset/change.
+- **Roles**: Admin, moderator, user.
+- **Access Control**: CASL and guards to control access.
+- **User Profile**: Base information and avatar.
+- **Content Management**: CRUD for films and series (including series hierarchy `series -> season -> episode`).
+- **Movies**: Access modes (public/private), age restrictions, random selection, popular movies formula (visits, reviews, bookmarks).
+- **Metadata**: Genres, studios, countires, persons (various roles), images, trailers.
+- **Interactions**: Reviews, ratings, watchlists (watched, bookmarked, favorite), user & system collections.
+- **Co-viewing**: Rooms for watching movies together with synchronized playback.
+- **Monetization**: Subscriptions and one-time purchases via Stripe.
+- **Processing**: Video/audio track generation (multi-quality/language), fragment splitting, DASH manifest generation.
+- **Storage**: Google Cloud Storage integration.
+- **Optimization**: Powerful generation system for GraphQL args, rate limiting, throttling, optimized DataLoaders.
 
 ## Installation
 
 ### Prerequisites
 
-- **Node.js 18+**
-- **[ffmpeg](https://www.ffmpeg.org/download.html)**
+- **Node.js 20+**
+- **[ffmpeg](https://www.ffmpeg.org/download.html)** (for local video processing)
+- **Docker** & **Docker Compose** (recommended)
 
-### Setup
+### Environment Variables
 
-1. Install dependencies
-
-```bash
-$ npm install
-```
-
-2. Run the app
+Create a `.env` file in the root directory based on `.env.template`:
 
 ```bash
-# development
-$ npm run start
+cp .env.template .env
 ```
+
+Key configuration areas include:
+
+- Server Port & Client URL
+- Database Connection (Postgres)
+- Redis Connection
+- JWT Tokens (Access, Refresh, Confirmation, etc.)
+- Mailing Configuration
+- Google Cloud Storage Credentials
+- Stripe API Keys
+- Throttling Limits
+
+### Setup using Docker (Recommended)
+
+1. Build and start the containers:
 
 ```bash
-# watch
-$ npm run start:dev
+docker-compose up -d --build
 ```
+
+This will start the application, PostgreSQL, Redis, and run migrations/seed scripts.
+
+### Setup Locally
+
+1. Install dependencies:
 
 ```bash
-# production
-$ npm run start:prod
+npm install
 ```
 
-## Video processing
+2. Run the app:
 
-1. Generate video and audio track of different quality/resolution from original video
-   
-  | One language                                                                                                                     |  Multiple languages                                                                                                               |
-  |----------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-  | <img src="https://github.com/user-attachments/assets/67488f2a-2b7d-4be6-b7fb-8d8f2135be11" alt="drawing" style="height:400px;"/> | <img src="https://github.com/user-attachments/assets/d967b013-cc91-4dbb-a5b1-6e9c36a2836a" alt="drawing" style="height:400px;"/> |
+- development
 
-2. Split each track into short fragments (max 4 seconds)
+```bash
+npm run start:dev
+```
 
-<img src="https://github.com/user-attachments/assets/90ce0ae9-6d10-4bee-aadd-7375ce5c83dc" alt="drawing" style="height:400px;"/>
+- production
 
-3. Store information about tracks and their segmentation in dash manifest
+```bash
+npm run build
+npm run start:prod
+```
+
+## Video Processing Flow
+
+1. **Generation**: Create video and audio tracks of different quality/resolution from original video.
+
+   | One language                                                                                                                     | Multiple languages                                                                                                                  |
+   | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+   | <img src="https://github.com/user-attachments/assets/67488f2a-2b7d-4be6-b7fb-8d8f2135be11" alt="Single Language" height="200" /> | <img src="https://github.com/user-attachments/assets/d967b013-cc91-4dbb-a5b1-6e9c36a2836a" alt="Multiple Languages" height="200" /> |
+
+2. **Segmentation**: Split each track into short fragments (max 4 seconds).
+
+   <img src="https://github.com/user-attachments/assets/90ce0ae9-6d10-4bee-aadd-7375ce5c83dc" alt="Segmentation" height="200" />
+
+3. **Manifest**: Store information about tracks and their segmentation in a DASH manifest for adaptive streaming.
