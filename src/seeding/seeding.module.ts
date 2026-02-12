@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedingService } from './seeding.service';
+import { TestSeedingService } from './test-seeding.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmConfig } from '../config/typeorm.config';
 
@@ -13,7 +14,7 @@ import { TypeOrmConfig } from '../config/typeorm.config';
       useClass: TypeOrmConfig,
     }),
   ],
-  providers: [SeedingService],
-  exports: [SeedingService],
+  providers: [SeedingService, TestSeedingService],
+  exports: [SeedingService, TestSeedingService],
 })
 export class SeedingModule {}
