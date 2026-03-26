@@ -33,7 +33,7 @@
     "migration:revert:prod": "npm run typeorm migration:revert -- -d dist/typeorm.data-source.js"
   },
   "dependencies": {
-    "@apollo/server": "^5.4.0",
+    "@apollo/server": "^5.5.0",
     "@as-integrations/express5": "^1.1.2",
     "@casl/ability": "^6.7.3",
     "@google-cloud/storage": "^7.19.0",
